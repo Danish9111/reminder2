@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reminder_app/HomeScreens/HomeScreen.dart';
+import 'package:reminder_app/bottom_navigation_bar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const HomeScreen(),
+      home: const BottomNavigationScreen(),
     );
   }
 }
