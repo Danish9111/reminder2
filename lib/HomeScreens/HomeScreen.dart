@@ -570,7 +570,7 @@ class _HomeScreenState extends State<HomeScreen>
   final Color primaryColor = const Color(0xFF9B59B6);
 
   // Task list now managed at the HomeScreen level
-  List<Map<String, dynamic>> _tasks = [
+  final List<Map<String, dynamic>> _tasks = [
     {
       'title': "Azya Azy scho - Today 10:00 AM",
       'status': 'urgent',
