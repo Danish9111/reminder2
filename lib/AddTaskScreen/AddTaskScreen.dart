@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:reminder_app/AppColors/AppColors.dart';
 
 enum TaskType { standard, safetyCritical }
 
@@ -13,6 +13,8 @@ class AddTaskScreen extends StatefulWidget {
 }
 
 class _AddTaskScreenState extends State<AddTaskScreen> {
+  static const platform = MethodChannel('com.example.reminder_app/alarm');
+
   final TextEditingController _taskController = TextEditingController();
   final Color primaryColor = const Color(0xFF9B59B6);
 
@@ -20,23 +22,38 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   TimeOfDay _selectedTime = TimeOfDay.now();
 
   TaskType _selectedTaskType = TaskType.standard;
-  Map<String, bool> _assignees = {
+  final Map<String, bool> _assignees = {
     'Hazrat': false,
     'Azy': false,
     'Everyone': false,
   };
   bool _isPhotoProofRequired = false;
 
-  // -------------------------
-  // 🔔 Your alarm function call
-  // -------------------------
-  Future<void> scheduleNativeAlarm(DateTime dateTime, String title) async {
-    // your already-added code here
+  Future<void> scheduleNativeAlarm(
+    DateTime dateTime,
+    String title,
+    List<String> assignees,
+  ) async {
+    try {
+      final int alarmId = dateTime.millisecondsSinceEpoch ~/ 1000;
+      final int timeInMillis = dateTime.millisecondsSinceEpoch;
+      final String body = 'Assigned to: ${assignees.join(', ')}';
+
+      await platform.invokeMethod('scheduleAlarm', {
+        'time': timeInMillis,
+        'id': alarmId,
+        'title': title,
+        'body': body,
+      });
+
+      debugPrint('Alarm scheduled for: $dateTime');
+    } on PlatformException catch (e) {
+      debugPrint('Failed to schedule alarm: ${e.message}');
+    }
   }
 
   void _handleTaskTypeToggle(int index) {
-    TaskType newType =
-    index == 0 ? TaskType.standard : TaskType.safetyCritical;
+    TaskType newType = index == 0 ? TaskType.standard : TaskType.safetyCritical;
     setState(() {
       _selectedTaskType = newType;
       _isPhotoProofRequired = newType == TaskType.safetyCritical;
@@ -84,10 +101,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       context: context,
       initialTime: _selectedTime,
       builder: (context, child) {
-        return Theme(
-          data: ThemeData.light(),
-          child: child!,
-        );
+        return Theme(data: ThemeData.light(), child: child!);
       },
     );
     if (picked != null) setState(() => _selectedTime = picked);
@@ -104,8 +118,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       return;
     }
 
-    final assigneesList =
-    _assignees.entries.where((e) => e.value).map((e) => e.key).toList();
+    final assigneesList = _assignees.entries
+        .where((e) => e.value)
+        .map((e) => e.key)
+        .toList();
 
     if (assigneesList.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -114,8 +130,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       return;
     }
 
-    final String reminderType =
-    _selectedTaskType == TaskType.safetyCritical ? 'critical' : 'urgent';
+    final String reminderType = _selectedTaskType == TaskType.safetyCritical
+        ? 'critical'
+        : 'urgent';
 
     final DateTime fullDateTime = DateTime(
       _selectedDate.year,
@@ -125,8 +142,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       _selectedTime.minute,
     );
 
-    final formattedDate =
-    DateFormat('MMM dd, yyyy - hh:mm a').format(fullDateTime);
+    final formattedDate = DateFormat(
+      'MMM dd, yyyy - hh:mm a',
+    ).format(fullDateTime);
 
     final newTask = {
       'title': "${_taskController.text.trim()} - $formattedDate",
@@ -141,11 +159,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       'photoProofRequired': _isPhotoProofRequired,
     };
 
-    // -----------------------------------------
-    // 🔔 Call Native Alarm HERE
-    // -----------------------------------------
-    await scheduleNativeAlarm(fullDateTime, _taskController.text.trim());
-    // -----------------------------------------
+    await scheduleNativeAlarm(
+      fullDateTime,
+      _taskController.text.trim(),
+      assigneesList,
+    );
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -166,8 +184,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final textScale = MediaQuery.of(context).textScaleFactor;
-    final isSafetyCritical =
-        _selectedTaskType == TaskType.safetyCritical;
+    final isSafetyCritical = _selectedTaskType == TaskType.safetyCritical;
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
@@ -181,14 +198,16 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               SizedBox(height: screenHeight * 0.02),
               _buildDateTimeSelectors(screenWidth, textScale),
               SizedBox(height: screenHeight * 0.02),
-              _buildTaskTypeToggle(
-                  isSafetyCritical, screenWidth, textScale),
+              _buildTaskTypeToggle(isSafetyCritical, screenWidth, textScale),
               SizedBox(height: screenHeight * 0.02),
               _buildMultiAssignCheckboxes(screenWidth, textScale),
               SizedBox(height: screenHeight * 0.02),
               if (_isPhotoProofRequired)
                 _buildPhotoProofSection(
-                    isSafetyCritical, screenWidth, textScale),
+                  isSafetyCritical,
+                  screenWidth,
+                  textScale,
+                ),
               if (isSafetyCritical)
                 _buildSafetyCriticalNotes(screenWidth, textScale),
               SizedBox(height: screenHeight * 0.08),
@@ -196,8 +215,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           ),
         ),
       ),
-      bottomNavigationBar:
-      _buildAddTaskButton(screenWidth, screenHeight, textScale),
+      bottomNavigationBar: _buildAddTaskButton(
+        screenWidth,
+        screenHeight,
+        textScale,
+      ),
     );
   }
 
@@ -206,16 +228,16 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   // ----------------------------------------------------------------
 
   Widget _buildDateTimeSelectors(double width, double scale) {
-    final formattedDate =
-    DateFormat('EEE, MMM d, yyyy').format(_selectedDate);
+    final formattedDate = DateFormat('EEE, MMM d, yyyy').format(_selectedDate);
     final formattedTime = _selectedTime.format(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Due Date & Time",
-            style:
-            TextStyle(fontSize: 18 * scale, fontWeight: FontWeight.bold)),
+        Text(
+          "Due Date & Time",
+          style: TextStyle(fontSize: 18 * scale, fontWeight: FontWeight.bold),
+        ),
         SizedBox(height: width * 0.02),
         Row(
           children: [
@@ -255,8 +277,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(
-            vertical: screenWidth * 0.03,
-            horizontal: screenWidth * 0.02),
+          vertical: screenWidth * 0.03,
+          horizontal: screenWidth * 0.02,
+        ),
         decoration: BoxDecoration(
           color: primaryColor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8),
@@ -267,11 +290,14 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             Icon(icon, color: primaryColor),
             SizedBox(width: screenWidth * 0.02),
             Flexible(
-              child: Text(label,
-                  style: TextStyle(
-                      color: primaryColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14 * textScale)),
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: primaryColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14 * textScale,
+                ),
+              ),
             ),
           ],
         ),
@@ -287,9 +313,13 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Task Details",
-                style: TextStyle(
-                    fontSize: 18 * scale, fontWeight: FontWeight.bold)),
+            Text(
+              "Task Details",
+              style: TextStyle(
+                fontSize: 18 * scale,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             SizedBox(height: width * 0.02),
             TextField(
               controller: _taskController,
@@ -307,23 +337,26 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   }
 
   Widget _buildTaskTypeToggle(
-      bool isSafetyCritical, double width, double scale) {
+    bool isSafetyCritical,
+    double width,
+    double scale,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Text("Task Type: ",
-                style: TextStyle(
-                    fontSize: 16 * scale, fontWeight: FontWeight.w600)),
+            Text(
+              "Task Type: ",
+              style: TextStyle(
+                fontSize: 16 * scale,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             Icon(
-              isSafetyCritical
-                  ? Icons.security
-                  : Icons.check_circle_outline,
-              color: isSafetyCritical
-                  ? Colors.red
-                  : Colors.blue,
-            )
+              isSafetyCritical ? Icons.security : Icons.check_circle_outline,
+              color: isSafetyCritical ? Colors.red : Colors.blue,
+            ),
           ],
         ),
         SizedBox(height: width * 0.02),
@@ -335,13 +368,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           onPressed: _handleTaskTypeToggle,
           children: [
             Padding(
-              padding:
-              EdgeInsets.symmetric(horizontal: width * 0.04),
+              padding: EdgeInsets.symmetric(horizontal: width * 0.04),
               child: Text("Standard Chore"),
             ),
             Padding(
-              padding:
-              EdgeInsets.symmetric(horizontal: width * 0.04),
+              padding: EdgeInsets.symmetric(horizontal: width * 0.04),
               child: Text("Safety Critical"),
             ),
           ],
@@ -354,9 +385,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Multi-Assign",
-            style: TextStyle(
-                fontSize: 18 * scale, fontWeight: FontWeight.bold)),
+        Text(
+          "Multi-Assign",
+          style: TextStyle(fontSize: 18 * scale, fontWeight: FontWeight.bold),
+        ),
         SizedBox(height: width * 0.02),
         Wrap(
           spacing: width * 0.03,
@@ -373,13 +405,17 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   }
 
   Widget _buildPhotoProofSection(
-      bool isSafetyCritical, double width, double scale) {
+    bool isSafetyCritical,
+    double width,
+    double scale,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Photo Proof (Required)",
-            style: TextStyle(
-                fontSize: 18 * scale, fontWeight: FontWeight.bold)),
+        Text(
+          "Photo Proof (Required)",
+          style: TextStyle(fontSize: 18 * scale, fontWeight: FontWeight.bold),
+        ),
         SizedBox(height: width * 0.03),
         Card(
           elevation: 1,
@@ -400,16 +436,17 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     );
   }
 
-  Widget _buildAddTaskButton(
-      double width, double height, double scale) {
+  Widget _buildAddTaskButton(double width, double height, double scale) {
     return Container(
       padding: EdgeInsets.all(width * 0.04),
       color: Colors.white,
       child: ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
         onPressed: _addTask,
-        child: Text("Add Task",
-            style:
-            TextStyle(fontSize: 18 * scale, color: Colors.white)),
+        child: Text(
+          "Add Task",
+          style: TextStyle(fontSize: 18 * scale, color: Colors.white),
+        ),
       ),
     );
   }

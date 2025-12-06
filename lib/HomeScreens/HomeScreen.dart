@@ -222,35 +222,7 @@ class _HomeScreenState extends State<HomeScreen>
         onProfileTap: _handleProfileTap,
         onLogout: _handleLogout,
       ),
-      appBar: AppBar(
-        title: Text(
-          AppBarConfig.getTitle(_selectedIndex),
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        backgroundColor: primaryColor,
-        iconTheme: const IconThemeData(color: Colors.white),
-        automaticallyImplyLeading: true,
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.notifications_none,
-              color: Colors.white,
-              size: 30,
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const NotificationScreen(),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+
       body: Stack(
         children: [
           currentBody,
@@ -264,23 +236,6 @@ class _HomeScreenState extends State<HomeScreen>
           //   ),
         ],
       ),
-      floatingActionButton: isHomeScreen
-          ? FloatingActionButton(
-              onPressed: _toggleInputBar,
-              backgroundColor: primaryColor,
-              child: const Icon(Icons.mic, color: Colors.white, size: 30),
-            )
-          : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      // bottomNavigationBar: BottomNavigationBar(
-      //   backgroundColor: Colors.white,
-      //   type: BottomNavigationBarType.fixed,
-      //   selectedItemColor: primaryColor,
-      //   unselectedItemColor: Colors.grey,
-      //   currentIndex: _selectedIndex,
-      //   onTap: _onItemTapped,
-      //   items: BottomNavConfig.items,
-      // ),
     );
   }
 }
@@ -780,7 +735,16 @@ class MainHomeContentState extends State<MainHomeContent> {
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
 
+  final TextEditingController _voiceInputController = TextEditingController();
+  bool _isListening = false;
+
   List<Map<String, dynamic>> get _tasks => widget.tasks;
+
+  @override
+  void dispose() {
+    _voiceInputController.dispose();
+    super.dispose();
+  }
 
   void _goToPreviousWeek() {
     setState(() {
@@ -805,6 +769,124 @@ class MainHomeContentState extends State<MainHomeContent> {
 
   void _toggleCalendarExpanded() {
     setState(() => _isCalendarExpanded = !_isCalendarExpanded);
+  }
+
+  void _toggleListening() {
+    setState(() {
+      _isListening = !_isListening;
+    });
+    // TODO: Implement actual speech-to-text here
+  }
+
+  void _handleQuickTaskSubmit(String value) {
+    if (value.trim().isEmpty) return;
+
+    final newTask = {
+      'title': value.trim(),
+      'status': 'urgent',
+      'icon': Icons.checklist_rtl,
+      'dueDate': DateTime.now().add(const Duration(hours: 1)).toIso8601String(),
+      'done': false,
+      'assignees': ['Everyone'],
+      'taskType': 'standard',
+      'photoProofRequired': false,
+    };
+
+    widget.onTaskAdded(newTask);
+    _voiceInputController.clear();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Task "$value" added!'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  Widget _buildVoiceInputBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: TextField(
+                  controller: _voiceInputController,
+                  decoration: InputDecoration(
+                    hintText: 'Add task with voice or type...',
+                    hintStyle: TextStyle(color: Colors.grey.shade500),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.auto_awesome,
+                      color: widget.primaryColor,
+                      size: 20,
+                    ),
+                  ),
+                  onSubmitted: _handleQuickTaskSubmit,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            GestureDetector(
+              onTap: _toggleListening,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: _isListening
+                        ? [Colors.red.shade400, Colors.red.shade600]
+                        : [
+                            widget.primaryColor,
+                            widget.primaryColor.withOpacity(0.8),
+                          ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: (_isListening ? Colors.red : widget.primaryColor)
+                          .withOpacity(0.4),
+                      spreadRadius: 2,
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  _isListening ? Icons.stop : Icons.mic,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -850,11 +932,11 @@ class MainHomeContentState extends State<MainHomeContent> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
               ],
             ),
           ),
         ),
+        _buildVoiceInputBar(),
       ],
     );
   }

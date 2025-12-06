@@ -1,167 +1,118 @@
-// filename: ProfileScreen.dart
 import 'package:flutter/material.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
-  // --- Mock Data ---
-  final String userName = "Bilal";
-  final double dailyCompletionRate = 85.0;
-  final double monthlyCompletionRate = 92.0;
-  final String safetyPhrase = "The purple bird flies at dawn.";
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
 
-  // --- Reliability Status Logic ---
-  Map<String, dynamic> getReliabilityStatus(double monthlyRate) {
-    if (monthlyRate >= 90) {
-      return {
-        'title': 'High Reliability',
-        'color': Colors.green.shade600,
-        'icon': Icons.verified_user,
-        'description': 'Proof disabled. Keep up the excellent work!',
-      };
-    } else if (monthlyRate >= 70) {
-      return {
-        'title': 'Building Reliability',
-        'color': Colors.orange.shade600,
-        'icon': Icons.trending_up,
-        'description': 'Gentle encouragement. You\'re almost there!',
-      };
-    } else {
-      return {
-        'title': 'Needs Support',
-        'color': Colors.red.shade600,
-        'icon': Icons.warning_amber_rounded,
-        'description':
-        'Triggers "Needs Support Log" on Family Page. Reach out for help.',
-      };
-    }
-  }
+class _ProfileScreenState extends State<ProfileScreen> {
+  final Color primaryColor = const Color(0xFF9B59B6);
+
+  final String userName = "Sarah";
+  final String userRole = "Mom";
+  final int tasksCompleted = 45;
+  final int kindnessStreak = 12;
+  final String safetyPhrase = "The purple bird flies at dawn.";
+  bool _isSafetyPhraseVisible = false;
+
+  final List<Map<String, dynamic>> badges = [
+    {
+      'name': 'Early Bird',
+      'icon': Icons.wb_sunny,
+      'color': Colors.orange,
+      'earned': true,
+    },
+    {
+      'name': 'Peacekeeper',
+      'icon': Icons.shield,
+      'color': Colors.purple,
+      'earned': true,
+    },
+    {
+      'name': 'Early Bird',
+      'icon': Icons.wb_sunny,
+      'color': Colors.orange,
+      'earned': false,
+    },
+    {
+      'name': 'Peacekeeper',
+      'icon': Icons.shield,
+      'color': Colors.purple,
+      'earned': false,
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final status = getReliabilityStatus(monthlyCompletionRate);
-    final primaryColor = const Color(0xFF9B59B6);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final textScale = MediaQuery.of(context).textScaleFactor;
-
     return Scaffold(
-      backgroundColor: Colors.white,
-      // appBar: AppBar(
-      //   backgroundColor: primaryColor,
-      //   title: Text(
-      //     "$userName's Profile",
-      //     style: TextStyle(color: Colors.white, fontSize: 18 * textScale),
-      //   ),
-      //   elevation: 0,
-      //   iconTheme: const IconThemeData(
-      //     color: Colors.white, // This makes the back arrow white
-      //   ),
-      // ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            horizontal: screenWidth * 0.06,
-            vertical: screenHeight * 0.02,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// 👤 USER HEADER
-              Center(
-                child: Column(
-                  children: [
-                    CircleAvatar(
-                      radius: screenWidth * 0.1,
-                      backgroundColor: primaryColor.withOpacity(0.1),
-                      child: Icon(Icons.person, size: screenWidth * 0.1, color: primaryColor),
-                    ),
-                    SizedBox(height: screenHeight * 0.01),
-                    Text(
-                      userName,
-                      style: TextStyle(
-                        fontSize: 24 * textScale,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      "Joined: 1 year ago",
-                      style: TextStyle(fontSize: 14 * textScale, color: Colors.grey.shade600),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.03),
-              Divider(),
-              SizedBox(height: screenHeight * 0.02),
-
-              /// 🏅 BADGES
-              _buildSectionHeader("🏅 Badges Earned (MVP)", textScale),
-              SizedBox(height: screenHeight * 0.015),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+      backgroundColor: Colors.grey.shade50,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildProfileHeader(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildBadgeChip("Responsibility", Icons.rule_sharp, Colors.blue, textScale, screenWidth),
-                  _buildBadgeChip("Kindness", Icons.favorite, Colors.pink, textScale, screenWidth),
+                  const SizedBox(height: 24),
+                  _buildBadgesSection(),
+                  const SizedBox(height: 24),
+                  _buildStatsSection(),
+                  const SizedBox(height: 16),
+                  _buildSafetyPhraseCard(),
+                  const SizedBox(height: 24),
+                  _buildSettingsSection(),
+                  const SizedBox(height: 40),
                 ],
               ),
-              SizedBox(height: screenHeight * 0.03),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-              /// 📊 STATS: COMPLETION RATES
-              _buildSectionHeader("📊 Task Completion Stats", textScale),
-              SizedBox(height: screenHeight * 0.015),
-              _buildStatCard(
-                title: "Daily Completion",
-                rate: dailyCompletionRate,
-                color: Colors.teal,
-                textScale: textScale,
-                screenWidth: screenWidth,
-              ),
-              SizedBox(height: screenHeight * 0.015),
-              _buildStatCard(
-                title: "Monthly Completion (30 Days)",
-                rate: monthlyCompletionRate,
-                color: primaryColor,
-                textScale: textScale,
-                screenWidth: screenWidth,
-              ),
-              SizedBox(height: screenHeight * 0.03),
-
-              /// 🔒 SAFETY PHRASE
-              _buildSectionHeader("🔒 Family Safety Code", textScale),
-              SizedBox(height: screenHeight * 0.015),
+  Widget _buildProfileHeader() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: primaryColor,
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 30, top: 10),
+          child: Column(
+            children: [
               Container(
-                padding: EdgeInsets.all(screenWidth * 0.04),
+                padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.yellow.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.amber.shade300),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Your shared phrase view:",
-                      style: TextStyle(fontSize: 14 * textScale, color: Colors.grey.shade800),
-                    ),
-                    SizedBox(height: screenHeight * 0.005),
-                    Text(
-                      safetyPhrase,
-                      style: TextStyle(
-                        fontSize: 16 * textScale,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ],
+                child: CircleAvatar(
+                  radius: 45,
+                  backgroundColor: Colors.brown.shade300,
+                  child: const Text('👩', style: TextStyle(fontSize: 50)),
                 ),
               ),
-              SizedBox(height: screenHeight * 0.03),
-
-              /// ✨ CONSISTENT RELIABILITY STATUS
-              _buildSectionHeader("✨ Reliability Status", textScale),
-              SizedBox(height: screenHeight * 0.015),
-              _buildReliabilityCard(status, textScale, screenWidth),
+              const SizedBox(height: 12),
+              Text(
+                '$userName ($userRole)',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
         ),
@@ -169,105 +120,307 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // --- Helper Widgets ---
-
-  Widget _buildSectionHeader(String title, double textScale) {
-    return Text(
-      title,
-      style: TextStyle(
-        fontSize: 18 * textScale,
-        fontWeight: FontWeight.bold,
-        color: Colors.grey.shade800,
-      ),
+  Widget _buildBadgesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'My Badges (Trophy Case)',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              'Earned',
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: badges.map((badge) => _buildBadgeItem(badge)).toList(),
+        ),
+      ],
     );
   }
 
-  Widget _buildBadgeChip(String label, IconData icon, Color color, double textScale, double screenWidth) {
-    return Chip(
-      avatar: Icon(icon, color: color, size: screenWidth * 0.05),
-      label: Text(
-        label,
-        style: TextStyle(color: Colors.grey.shade800, fontWeight: FontWeight.w500, fontSize: 14 * textScale),
-      ),
-      backgroundColor: color.withOpacity(0.1),
-      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.02, vertical: screenWidth * 0.015),
+  Widget _buildBadgeItem(Map<String, dynamic> badge) {
+    final bool isEarned = badge['earned'];
+    return Column(
+      children: [
+        Container(
+          width: 55,
+          height: 55,
+          decoration: BoxDecoration(
+            color: isEarned
+                ? (badge['color'] as Color).withOpacity(0.15)
+                : Colors.grey.shade200,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            badge['icon'],
+            color: isEarned ? badge['color'] : Colors.grey.shade400,
+            size: 28,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          badge['name'],
+          style: TextStyle(
+            fontSize: 11,
+            color: isEarned ? Colors.black87 : Colors.grey.shade500,
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildStatCard({
-    required String title,
-    required double rate,
-    required Color color,
-    required double textScale,
-    required double screenWidth,
-  }) {
+  Widget _buildStatsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'My Stats',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      blurRadius: 5,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tasks Completed:',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$tasksCompleted',
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      blurRadius: 5,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Kindness Streak:',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(
+                          '$kindnessStreak',
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Text('🔥', style: TextStyle(fontSize: 24)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSafetyPhraseCard() {
     return Container(
-      padding: EdgeInsets.all(screenWidth * 0.04),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.1),
+            color: Colors.grey.withOpacity(0.1),
             blurRadius: 5,
-            offset: const Offset(0, 3),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Flexible(
-            child: Text(
-              title,
-              style: TextStyle(fontSize: 16 * textScale, color: Colors.grey.shade700),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Family Safety Phrase',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                ),
+                if (_isSafetyPhraseVisible)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      safetyPhrase,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
-          Text(
-            "${rate.toStringAsFixed(0)}%",
-            style: TextStyle(fontSize: 20 * textScale, fontWeight: FontWeight.bold, color: color),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _isSafetyPhraseVisible = !_isSafetyPhraseVisible;
+              });
+            },
+            style: TextButton.styleFrom(
+              backgroundColor: primaryColor.withOpacity(0.1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            child: Text(
+              _isSafetyPhraseVisible ? 'Hide' : 'Reveal',
+              style: TextStyle(
+                color: primaryColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildReliabilityCard(Map<String, dynamic> status, double textScale, double screenWidth) {
-    return Container(
-      padding: EdgeInsets.all(screenWidth * 0.04),
-      decoration: BoxDecoration(
-        color: status['color'].withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: status['color']),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(status['icon'], size: screenWidth * 0.08, color: status['color']),
-          SizedBox(width: screenWidth * 0.03),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  status['title'],
-                  style: TextStyle(
-                    fontSize: 18 * textScale,
-                    fontWeight: FontWeight.bold,
-                    color: status['color'],
-                  ),
-                ),
-                SizedBox(height: screenWidth * 0.01),
-                Text(
-                  status['description'],
-                  style: TextStyle(fontSize: 14 * textScale, color: Colors.grey.shade800),
-                ),
-              ],
-            ),
+  Widget _buildSettingsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Settings',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
+          child: Column(
+            children: [
+              _buildSettingsItem(Icons.notifications_outlined, 'Notifications'),
+              _buildDivider(),
+              _buildSettingsItem(Icons.nightlight_outlined, 'Quiet Hours'),
+              _buildDivider(),
+              _buildSettingsItem(
+                Icons.card_membership,
+                'Subscription (Family Guardian)',
+              ),
+              _buildDivider(),
+              _buildSettingsItem(Icons.lock_outline, 'Privacy'),
+              _buildDivider(),
+              _buildSettingsItem(Icons.logout, 'Log Out', isLogout: true),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSettingsItem(
+    IconData icon,
+    String title, {
+    bool isLogout = false,
+  }) {
+    return InkWell(
+      onTap: () {
+        if (isLogout) {
+          // Handle logout
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isLogout ? Colors.red : Colors.grey.shade700,
+              size: 22,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: isLogout ? Colors.red : Colors.black87,
+                ),
+              ),
+            ),
+            Icon(Icons.chevron_right, color: Colors.grey.shade400, size: 22),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Divider(
+      height: 1,
+      color: Colors.grey.shade200,
+      indent: 16,
+      endIndent: 16,
     );
   }
 }
