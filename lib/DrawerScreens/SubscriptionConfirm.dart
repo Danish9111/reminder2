@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reminder_app/HomeScreens/HomeScreen.dart';
+import 'package:reminder_app/bottom_navigation_bar.dart';
 
 const Color primaryColor = Color(0xFF9B55B6);
 
@@ -44,7 +45,8 @@ class SubscriptionVerifiedScreen extends StatelessWidget {
                 Text(
                   "Verified!",
                   style: TextStyle(
-                    fontSize: 0.08 * screenWidth * textScale, // 8% of screen width
+                    fontSize:
+                        0.08 * screenWidth * textScale, // 8% of screen width
                     fontWeight: FontWeight.w900,
                     color: primaryColor,
                   ),
@@ -56,7 +58,8 @@ class SubscriptionVerifiedScreen extends StatelessWidget {
                   successMessage,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 0.05 * screenWidth * textScale, // 5% of screen width
+                    fontSize:
+                        0.05 * screenWidth * textScale, // 5% of screen width
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
@@ -68,7 +71,8 @@ class SubscriptionVerifiedScreen extends StatelessWidget {
                   subMessage,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 0.04 * screenWidth * textScale, // 4% of screen width
+                    fontSize:
+                        0.04 * screenWidth * textScale, // 4% of screen width
                     color: Colors.grey.shade600,
                   ),
                 ),
@@ -82,7 +86,9 @@ class SubscriptionVerifiedScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const HomeScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const BottomNavigationScreen(),
+                        ),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -95,7 +101,10 @@ class SubscriptionVerifiedScreen extends StatelessWidget {
                     child: Text(
                       "Go to Dashboard",
                       style: TextStyle(
-                        fontSize: 0.045 * screenWidth * textScale, // 4.5% of screen width
+                        fontSize:
+                            0.045 *
+                            screenWidth *
+                            textScale, // 4.5% of screen width
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),

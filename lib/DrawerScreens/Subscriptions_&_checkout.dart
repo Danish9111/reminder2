@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reminder_app/DrawerScreens/SubscriptionConfirm.dart';
+import 'package:reminder_app/widgets/custom_button.dart';
 
 const Color primaryColor = Color(0xFF9B55B6);
 const Color accentColor = Color(0xFFE0BBE4);
@@ -21,6 +22,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     final textScale = MediaQuery.of(context).textScaleFactor;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Subscription & Checkout'),
         backgroundColor: primaryColor,
@@ -38,7 +40,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                 style: TextStyle(
                   fontSize: 20 * textScale,
                   fontWeight: FontWeight.bold,
-                  color: primaryColor,
+                  color: Colors.black87,
                 ),
               ),
               SizedBox(height: screenHeight * 0.02),
@@ -48,7 +50,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                 title: "Premium Family Guardian",
                 price: "RM17.90/month",
                 description:
-                "The ultimate safety and coordination plan for your family.",
+                    "The ultimate safety and coordination plan for your family.",
                 features: [
                   "1 Leader + up to 6 Family Members (RM0)",
                   "Additional members: +RM2/month each (max 10 total)",
@@ -72,7 +74,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                 title: "Free Tier",
                 price: "RM0",
                 description:
-                "Basic features to get started with family organization.",
+                    "Basic features to get started with family organization.",
                 features: [
                   "Gentle Reminders Only",
                   "Lite Chat (Basic Messaging)",
@@ -107,10 +109,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     required double textScale,
   }) {
     final bool isPremium = index == 1;
-    final Color cardColor = isPremium ? primaryColor : Colors.grey.shade100;
-    final Color textColor = isPremium ? Colors.white : Colors.black87;
-    final Color featureIconColor = isPremium ? accentColor : primaryColor;
-    final Color borderColor = isSelected ? primaryColor : Colors.grey.shade300;
+    final Color cardColor = isPremium
+        ? primaryColor.withOpacity(0.08)
+        : Colors.grey.shade50;
+    final Color textColor = isPremium ? primaryColor : Colors.black87;
+    final Color featureIconColor = primaryColor;
+    final Color borderColor = isSelected
+        ? primaryColor
+        : (isPremium ? primaryColor.withOpacity(0.3) : Colors.grey.shade300);
 
     return InkWell(
       onTap: () {
@@ -124,19 +130,16 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         decoration: BoxDecoration(
           color: cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: borderColor,
-            width: isSelected ? 4 : 1,
-          ),
-          boxShadow: isSelected
-              ? [
+          border: Border.all(color: borderColor, width: 1),
+          boxShadow: [
             BoxShadow(
-              color: primaryColor.withOpacity(0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: isSelected
+                  ? primaryColor.withOpacity(0.15)
+                  : Colors.grey.withOpacity(0.08),
+              blurRadius: isSelected ? 12 : 6,
+              offset: const Offset(0, 3),
             ),
-          ]
-              : null,
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,7 +158,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               style: TextStyle(
                 fontSize: 26 * textScale,
                 fontWeight: FontWeight.w900,
-                color: isPremium ? accentColor : primaryColor,
+                color: primaryColor,
               ),
             ),
             SizedBox(height: screenWidth * 0.02),
@@ -167,9 +170,12 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                 color: textColor.withOpacity(0.8),
               ),
             ),
-            Divider(height: screenWidth * 0.08, color: Colors.white54),
+            Divider(
+              height: screenWidth * 0.08,
+              color: primaryColor.withOpacity(0.2),
+            ),
             ...features.map(
-                  (feature) => Padding(
+              (feature) => Padding(
                 padding: EdgeInsets.only(bottom: screenWidth * 0.015),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,16 +201,17 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               Center(
                 child: Container(
                   padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.03,
-                      vertical: screenWidth * 0.015),
+                    horizontal: screenWidth * 0.04,
+                    vertical: screenWidth * 0.02,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: primaryColor,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    "7-Day Free Trial Included",
+                    "✨ 7-Day Free Trial Included",
                     style: TextStyle(
-                      color: primaryColor,
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 14 * textScale,
                     ),
@@ -256,7 +263,12 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   }
 
   Widget _buildNoteItem(
-      double screenWidth, double textScale, IconData icon, String title, String content) {
+    double screenWidth,
+    double textScale,
+    IconData icon,
+    String title,
+    String content,
+  ) {
     return Padding(
       padding: EdgeInsets.only(bottom: screenWidth * 0.03),
       child: Row(
@@ -270,12 +282,17 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               children: [
                 Text(
                   title,
-                  style:
-                  TextStyle(fontWeight: FontWeight.bold, fontSize: 14 * textScale),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14 * textScale,
+                  ),
                 ),
                 Text(
                   content,
-                  style: TextStyle(fontSize: 14 * textScale, color: Colors.black54),
+                  style: TextStyle(
+                    fontSize: 14 * textScale,
+                    color: Colors.black54,
+                  ),
                 ),
               ],
             ),
@@ -293,45 +310,22 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     void onSubscribe() {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => SubscriptionVerifiedScreen(
-            isTrial: _selectedPlanIndex == 1,
-          ),
+          builder: (context) =>
+              SubscriptionVerifiedScreen(isTrial: _selectedPlanIndex == 1),
         ),
       );
     }
 
     return Container(
-      padding: EdgeInsets.only(
-        left: screenWidth * 0.04,
-        right: screenWidth * 0.04,
-        top: screenWidth * 0.025,
-        bottom: screenWidth * 0.025, // Reduced bottom padding
-      ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 2),
-        ],
+      padding: EdgeInsets.symmetric(
+        horizontal: screenWidth * 0.04,
+        vertical: screenWidth * 0.025,
       ),
       child: SafeArea(
-        child: ElevatedButton(
+        child: CustomButton.primary(
+          text: buttonText,
+          size: ButtonSize.large,
           onPressed: onSubscribe,
-          style: ElevatedButton.styleFrom(
-            minimumSize: Size(double.infinity, 54),
-            backgroundColor: primaryColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            elevation: 8,
-          ),
-          child: Text(
-            buttonText,
-            style: TextStyle(
-              fontSize: 18 * textScale,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
         ),
       ),
     );

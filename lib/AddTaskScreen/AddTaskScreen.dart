@@ -6,7 +6,7 @@ enum TaskType { standard, safetyCritical }
 
 class AddTaskScreen extends StatefulWidget {
   final Function(Map<String, dynamic>)? onTaskAdded;
-  const AddTaskScreen({Key? key, this.onTaskAdded}) : super(key: key);
+  const AddTaskScreen({super.key, this.onTaskAdded});
 
   @override
   State<AddTaskScreen> createState() => _AddTaskScreenState();

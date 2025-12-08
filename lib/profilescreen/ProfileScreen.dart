@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:reminder_app/AddTaskScreen/AddTaskScreen.dart';
+import 'package:reminder_app/DrawerScreens/Subscriptions_&_checkout.dart';
+import 'package:reminder_app/DrawerScreens/notification.dart';
+import 'package:reminder_app/DrawerScreens/quiet_hours.dart';
+import 'package:reminder_app/DrawerScreens/privacy_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({super.key});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -82,36 +87,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: primaryColor,
         borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(30),
-          bottomRight: Radius.circular(30),
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
         ),
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 30, top: 10),
-          child: Column(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
             children: [
+              // Avatar
               Container(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 3),
+                  border: Border.all(color: Colors.white, width: 2),
                 ),
                 child: CircleAvatar(
-                  radius: 45,
+                  radius: 26,
                   backgroundColor: Colors.brown.shade300,
-                  child: const Text('👩', style: TextStyle(fontSize: 50)),
+                  child: const Text('👩', style: TextStyle(fontSize: 28)),
                 ),
               ),
-              const SizedBox(height: 12),
-              Text(
-                '$userName ($userRole)',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+              const SizedBox(width: 14),
+              // Name and role
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    userName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    userRole,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.85),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -359,18 +380,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           child: Column(
             children: [
-              _buildSettingsItem(Icons.notifications_outlined, 'Notifications'),
+              _buildSettingsItem(
+                Icons.notifications_outlined,
+                'Notifications',
+                destination: NotificationScreen(),
+                onClick: () {},
+              ),
               _buildDivider(),
-              _buildSettingsItem(Icons.nightlight_outlined, 'Quiet Hours'),
+              _buildSettingsItem(
+                Icons.nightlight_outlined,
+                'Quiet Hours',
+                destination: QuietHoursScreen(),
+                onClick: () {},
+              ),
               _buildDivider(),
               _buildSettingsItem(
                 Icons.card_membership,
                 'Subscription (Family Guardian)',
+                destination: SubscriptionScreen(),
+                onClick: () {},
               ),
               _buildDivider(),
-              _buildSettingsItem(Icons.lock_outline, 'Privacy'),
+              _buildSettingsItem(
+                Icons.lock_outline,
+                'Privacy',
+                destination: PrivacyScreen(),
+                onClick: () {},
+              ),
               _buildDivider(),
-              _buildSettingsItem(Icons.logout, 'Log Out', isLogout: true),
+              _buildSettingsItem(
+                Icons.logout,
+                'Log Out',
+                isLogout: true,
+                destination: NotificationScreen(),
+                onClick: () {},
+              ),
             ],
           ),
         ),
@@ -382,12 +426,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     IconData icon,
     String title, {
     bool isLogout = false,
+    required Widget destination,
+    required VoidCallback onClick,
   }) {
     return InkWell(
       onTap: () {
         if (isLogout) {
           // Handle logout
         }
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => destination),
+        );
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
