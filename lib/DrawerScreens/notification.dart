@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-
-const Color primaryColor = Color(0xFF9B59B6);
+import 'package:reminder_app/AppColors/AppColors.dart';
 
 enum NotificationType { task, safetyAlert, generalReminder }
+
 enum TaskType { standard, safetyCritical }
 
 class NotificationScreen extends StatefulWidget {
@@ -67,13 +67,19 @@ class _NotificationScreenState extends State<NotificationScreen> {
       _notifications.removeWhere((n) => n['id'] == notification['id']);
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Task '${notification['title']}' marked as Done.")),
+      SnackBar(
+        content: Text("Task '${notification['title']}' marked as Done."),
+      ),
     );
   }
 
   void _showNotNowOptions(Map<String, dynamic> notification) {
     if (notification['taskType'] == TaskType.safetyCritical) {
-      _snoozeTask(notification, const Duration(minutes: 15), "Running Late (+15m)");
+      _snoozeTask(
+        notification,
+        const Duration(minutes: 15),
+        "Running Late (+15m)",
+      );
     } else {
       _showStandardSnoozeDialog(notification);
     }
@@ -96,7 +102,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
               Text(
                 "Snooze '${notification['title']}'",
                 style: TextStyle(
-                    fontSize: screenWidth * 0.05, fontWeight: FontWeight.bold),
+                  fontSize: screenWidth * 0.05,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               SizedBox(height: screenWidth * 0.04),
               _snoozeButton(notification, 1, "1 Hour", screenWidth),
@@ -109,9 +117,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   Widget _snoozeButton(
-      Map<String, dynamic> notification, int hours, String label, double screenWidth) {
+    Map<String, dynamic> notification,
+    int hours,
+    String label,
+    double screenWidth,
+  ) {
     return ListTile(
-      leading: Icon(Icons.snooze, color: primaryColor, size: screenWidth * 0.07),
+      leading: Icon(
+        Icons.snooze,
+        color: AppColors.primaryColor,
+        size: screenWidth * 0.07,
+      ),
       title: Text(label, style: TextStyle(fontSize: screenWidth * 0.045)),
       onTap: () {
         Navigator.pop(context);
@@ -120,13 +136,19 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
-  void _snoozeTask(Map<String, dynamic> notification, Duration duration, String label) {
+  void _snoozeTask(
+    Map<String, dynamic> notification,
+    Duration duration,
+    String label,
+  ) {
     setState(() {
       _notifications.removeWhere((n) => n['id'] == notification['id']);
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text("'${notification['title']}' snoozed $label. Rereminder activated."),
+        content: Text(
+          "'${notification['title']}' snoozed $label. Rereminder activated.",
+        ),
       ),
     );
   }
@@ -145,12 +167,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
         label: Text(label),
         selected: isSelected,
         backgroundColor: Colors.grey.shade100,
-        selectedColor: primaryColor.withOpacity(0.1),
-        checkmarkColor: primaryColor,
+        selectedColor: AppColors.primaryColor.withOpacity(0.1),
+        checkmarkColor: AppColors.primaryColor,
         labelStyle: TextStyle(
-            color: isSelected ? primaryColor : Colors.black,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
-        side: BorderSide(color: isSelected ? primaryColor : Colors.grey.shade300),
+          color: isSelected ? AppColors.primaryColor : Colors.black,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+        side: BorderSide(
+          color: isSelected ? AppColors.primaryColor : Colors.grey.shade300,
+        ),
         onSelected: (bool selected) {
           setState(() {
             _selectedFilter = selected ? type : null;
@@ -174,7 +199,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Color _getColor(NotificationType type) {
     switch (type) {
       case NotificationType.task:
-        return primaryColor;
+        return AppColors.primaryColor;
       case NotificationType.safetyAlert:
         return Colors.red.shade600;
       case NotificationType.generalReminder:
@@ -184,9 +209,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   Widget _buildTaskCard(Map<String, dynamic> notification, double screenWidth) {
     final type = notification['type'] as NotificationType;
-    final isSafetyCritical = notification['taskType'] == TaskType.safetyCritical;
+    final isSafetyCritical =
+        notification['taskType'] == TaskType.safetyCritical;
     final cardColor = isSafetyCritical ? Colors.red.shade50 : Colors.white;
-    final borderColor = isSafetyCritical ? Colors.red.shade400 : Colors.grey.shade200;
+    final borderColor = isSafetyCritical
+        ? Colors.red.shade400
+        : Colors.grey.shade200;
 
     return Card(
       margin: EdgeInsets.only(bottom: screenWidth * 0.04),
@@ -203,7 +231,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(_getIcon(type), color: _getColor(type), size: screenWidth * 0.08),
+                Icon(
+                  _getIcon(type),
+                  color: _getColor(type),
+                  size: screenWidth * 0.08,
+                ),
                 SizedBox(width: screenWidth * 0.03),
                 Expanded(
                   child: Column(
@@ -214,24 +246,29 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         style: TextStyle(
                           fontSize: screenWidth * 0.045,
                           fontWeight: FontWeight.bold,
-                          color: isSafetyCritical ? Colors.red.shade800 : Colors.black87,
+                          color: isSafetyCritical
+                              ? Colors.red.shade800
+                              : Colors.black87,
                         ),
                       ),
                       SizedBox(height: screenWidth * 0.015),
                       Text(
                         notification['time'],
                         style: TextStyle(
-                            fontSize: screenWidth * 0.035,
-                            color: isSafetyCritical
-                                ? Colors.red.shade600
-                                : Colors.grey.shade600),
+                          fontSize: screenWidth * 0.035,
+                          color: isSafetyCritical
+                              ? Colors.red.shade600
+                              : Colors.grey.shade600,
+                        ),
                       ),
                       if (isSafetyCritical)
                         Padding(
                           padding: EdgeInsets.only(top: screenWidth * 0.015),
                           child: Container(
                             padding: EdgeInsets.symmetric(
-                                horizontal: screenWidth * 0.015, vertical: screenWidth * 0.007),
+                              horizontal: screenWidth * 0.015,
+                              vertical: screenWidth * 0.007,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.red.shade100,
                               borderRadius: BorderRadius.circular(6),
@@ -239,9 +276,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             child: Text(
                               "CRITICAL: T+${notification['escalationLevel']}m. Partner Notified.",
                               style: TextStyle(
-                                  fontSize: screenWidth * 0.03,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.red.shade700),
+                                fontSize: screenWidth * 0.03,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.red.shade700,
+                              ),
                             ),
                           ),
                         ),
@@ -258,46 +296,76 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ),
           // Action Buttons Section
           Container(
-            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.02, vertical: screenWidth * 0.02),
+            padding: EdgeInsets.symmetric(
+              horizontal: screenWidth * 0.02,
+              vertical: screenWidth * 0.02,
+            ),
             decoration: BoxDecoration(
               color: isSafetyCritical ? Colors.white : Colors.grey.shade50,
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(16),
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _actionButton("Done", Icons.check_circle, primaryColor, () {
-                  _markAsDone(notification);
-                }, screenWidth),
                 _actionButton(
-                    isSafetyCritical ? "Running Late (+15m)" : "Not Now",
-                    isSafetyCritical ? Icons.timer_off : Icons.snooze,
-                    Colors.orange.shade700, () => _showNotNowOptions(notification),
-                    screenWidth),
-                _actionButton("Reschedule", Icons.schedule, Colors.blue.shade700,
-                        () => _reschedule(notification), screenWidth),
+                  "Done",
+                  Icons.check_circle,
+                  AppColors.primaryColor,
+                  () {
+                    _markAsDone(notification);
+                  },
+                  screenWidth,
+                ),
+                _actionButton(
+                  isSafetyCritical ? "Running Late (+15m)" : "Not Now",
+                  isSafetyCritical ? Icons.timer_off : Icons.snooze,
+                  Colors.orange.shade700,
+                  () => _showNotNowOptions(notification),
+                  screenWidth,
+                ),
+                _actionButton(
+                  "Reschedule",
+                  Icons.schedule,
+                  Colors.blue.shade700,
+                  () => _reschedule(notification),
+                  screenWidth,
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
   Widget _actionButton(
-      String label, IconData icon, Color color, VoidCallback onPressed, double screenWidth) {
+    String label,
+    IconData icon,
+    Color color,
+    VoidCallback onPressed,
+    double screenWidth,
+  ) {
     return Flexible(
       child: TextButton.icon(
         onPressed: onPressed,
         style: TextButton.styleFrom(
-          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.015, vertical: screenWidth * 0.015),
+          padding: EdgeInsets.symmetric(
+            horizontal: screenWidth * 0.015,
+            vertical: screenWidth * 0.015,
+          ),
         ),
         icon: Icon(icon, size: screenWidth * 0.05, color: color),
         label: Text(
           label,
           textAlign: TextAlign.center,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: screenWidth * 0.035),
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.bold,
+            fontSize: screenWidth * 0.035,
+          ),
         ),
       ),
     );
@@ -311,7 +379,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Notification Centre'),
-        backgroundColor: primaryColor,
+        backgroundColor: AppColors.primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -321,13 +389,19 @@ class _NotificationScreenState extends State<NotificationScreen> {
           // Filter Chips
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: screenWidth * 0.03),
+            padding: EdgeInsets.symmetric(
+              horizontal: screenWidth * 0.04,
+              vertical: screenWidth * 0.03,
+            ),
             child: Row(
               children: [
                 _buildFilterChip("All", null),
                 _buildFilterChip("Tasks", NotificationType.task),
                 _buildFilterChip("Safety Alerts", NotificationType.safetyAlert),
-                _buildFilterChip("General Reminders", NotificationType.generalReminder),
+                _buildFilterChip(
+                  "General Reminders",
+                  NotificationType.generalReminder,
+                ),
               ],
             ),
           ),
@@ -336,25 +410,37 @@ class _NotificationScreenState extends State<NotificationScreen> {
           Expanded(
             child: _filteredNotifications.isEmpty
                 ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.notifications_none,
-                      size: screenWidth * 0.2, color: Colors.grey.shade300),
-                  Text(
-                    "No new notifications!",
-                    style: TextStyle(fontSize: screenWidth * 0.045, color: Colors.grey),
-                  ),
-                ],
-              ),
-            )
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.notifications_none,
+                          size: screenWidth * 0.2,
+                          color: Colors.grey.shade300,
+                        ),
+                        Text(
+                          "No new notifications!",
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.045,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
                 : ListView.builder(
-              padding: EdgeInsets.fromLTRB(
-                  screenWidth * 0.04, screenWidth * 0.04, screenWidth * 0.04, screenWidth * 0.12), // Added bottom padding
-              itemCount: _filteredNotifications.length,
-              itemBuilder: (context, index) =>
-                  _buildTaskCard(_filteredNotifications[index], screenWidth),
-            ),
+                    padding: EdgeInsets.fromLTRB(
+                      screenWidth * 0.04,
+                      screenWidth * 0.04,
+                      screenWidth * 0.04,
+                      screenWidth * 0.12,
+                    ), // Added bottom padding
+                    itemCount: _filteredNotifications.length,
+                    itemBuilder: (context, index) => _buildTaskCard(
+                      _filteredNotifications[index],
+                      screenWidth,
+                    ),
+                  ),
           ),
         ],
       ),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reminder_app/AppColors/AppColors.dart';
 
-const Color primaryColor = AppColors.primaryColor;
-
 class QuietHoursScreen extends StatefulWidget {
   const QuietHoursScreen({super.key});
 
@@ -41,7 +39,7 @@ class _QuietHoursScreenState extends State<QuietHoursScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: primaryColor,
+              primary: AppColors.primaryColor,
               onPrimary: Colors.white,
               surface: Colors.white,
               onSurface: Colors.black,
@@ -74,7 +72,7 @@ class _QuietHoursScreenState extends State<QuietHoursScreen> {
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: const Text('Quiet Hours'),
-        backgroundColor: primaryColor,
+        backgroundColor: AppColors.primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -90,18 +88,24 @@ class _QuietHoursScreenState extends State<QuietHoursScreen> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      primaryColor.withOpacity(0.1),
-                      primaryColor.withOpacity(0.05),
+                      AppColors.primaryColor.withOpacity(0.1),
+                      AppColors.primaryColor.withOpacity(0.05),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: primaryColor.withOpacity(0.2)),
+                  border: Border.all(
+                    color: AppColors.primaryColor.withOpacity(0.2),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.nightlight_round, color: primaryColor, size: 32),
+                    Icon(
+                      Icons.nightlight_round,
+                      color: AppColors.primaryColor,
+                      size: 32,
+                    ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
@@ -145,7 +149,7 @@ class _QuietHoursScreenState extends State<QuietHoursScreen> {
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                   ),
                   value: _quietHoursEnabled,
-                  activeColor: primaryColor,
+                  activeColor: AppColors.primaryColor,
                   onChanged: (value) {
                     setState(() {
                       _quietHoursEnabled = value;
@@ -209,13 +213,14 @@ class _QuietHoursScreenState extends State<QuietHoursScreen> {
                               height: 40,
                               decoration: BoxDecoration(
                                 color: _selectedDays[index]
-                                    ? primaryColor
+                                    ? AppColors.primaryColor
                                     : Colors.grey.shade100,
                                 shape: BoxShape.circle,
                                 boxShadow: _selectedDays[index]
                                     ? [
                                         BoxShadow(
-                                          color: primaryColor.withOpacity(0.3),
+                                          color: AppColors.primaryColor
+                                              .withOpacity(0.3),
                                           blurRadius: 8,
                                           offset: const Offset(0, 2),
                                         ),
@@ -350,10 +355,10 @@ class _QuietHoursScreenState extends State<QuietHoursScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: primaryColor.withOpacity(0.1),
+                color: AppColors.primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: primaryColor, size: 24),
+              child: Icon(icon, color: AppColors.primaryColor, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -422,7 +427,11 @@ class _QuietHoursScreenState extends State<QuietHoursScreen> {
               ],
             ),
           ),
-          Switch(value: value, activeColor: primaryColor, onChanged: onChanged),
+          Switch(
+            value: value,
+            activeColor: AppColors.primaryColor,
+            onChanged: onChanged,
+          ),
         ],
       ),
     );

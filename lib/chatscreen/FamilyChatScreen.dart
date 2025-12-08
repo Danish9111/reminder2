@@ -1,6 +1,9 @@
 // filename: FamilyChatScreen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // For SystemUiOverlayStyle
+import 'package:flutter/services.dart';
+import 'package:reminder_app/AppColors/AppColors.dart';
+import 'package:reminder_app/DrawerScreens/FamilyPage.dart'
+    as appColors; // For SystemUiOverlayStyle
 
 class FamilyChatScreen extends StatefulWidget {
   const FamilyChatScreen({Key? key}) : super(key: key);
@@ -12,7 +15,6 @@ class FamilyChatScreen extends StatefulWidget {
 class _FamilyChatScreenState extends State<FamilyChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final Color primaryColor = const Color(0xFF9B59B6);
 
   final List<Map<String, dynamic>> _messages = [
     {
@@ -130,7 +132,9 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
         child: InkWell(
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Converting to Task... (Opened Add Task Screen)")),
+              const SnackBar(
+                content: Text("Converting to Task... (Opened Add Task Screen)"),
+              ),
             );
           },
           child: Container(
@@ -141,23 +145,29 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  primaryColor.withOpacity(0.1),
-                  primaryColor.withOpacity(0.05),
+                  AppColors.primaryColor.withOpacity(0.1),
+                  AppColors.primaryColor.withOpacity(0.05),
                 ],
               ),
               borderRadius: BorderRadius.circular(screenWidth * 0.05),
-              border: Border.all(color: primaryColor.withOpacity(0.3)),
+              border: Border.all(
+                color: AppColors.primaryColor.withOpacity(0.3),
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.auto_awesome, size: screenWidth * 0.03, color: primaryColor),
+                Icon(
+                  Icons.auto_awesome,
+                  size: screenWidth * 0.03,
+                  color: AppColors.primaryColor,
+                ),
                 SizedBox(width: screenWidth * 0.015),
                 Text(
                   "Turn this into a reminder? (Premium)",
                   style: TextStyle(
                     fontSize: 11 * textScale,
-                    color: primaryColor.withOpacity(0.9),
+                    color: AppColors.primaryColor.withOpacity(0.9),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -171,15 +181,25 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
     );
   }
 
-  Widget _buildMessageBubble(Map<String, dynamic> msg, double screenWidth, double textScale) {
+  Widget _buildMessageBubble(
+    Map<String, dynamic> msg,
+    double screenWidth,
+    double textScale,
+  ) {
     final isMe = msg['isMe'];
 
     return Column(
-      crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: isMe
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       children: [
         if (!isMe)
           Padding(
-            padding: EdgeInsets.only(left: screenWidth * 0.03, bottom: 4, top: 6),
+            padding: EdgeInsets.only(
+              left: screenWidth * 0.03,
+              bottom: 4,
+              top: 6,
+            ),
             child: Text(
               msg['sender'],
               style: TextStyle(
@@ -200,19 +220,23 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
             vertical: screenWidth * 0.03,
           ),
           decoration: BoxDecoration(
-            color: isMe ? primaryColor : Colors.white,
+            color: isMe ? AppColors.primaryColor : Colors.white,
             borderRadius: BorderRadius.only(
               topLeft: const Radius.circular(20),
               topRight: const Radius.circular(20),
-              bottomLeft: isMe ? const Radius.circular(20) : const Radius.circular(4),
-              bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(20),
+              bottomLeft: isMe
+                  ? const Radius.circular(20)
+                  : const Radius.circular(4),
+              bottomRight: isMe
+                  ? const Radius.circular(4)
+                  : const Radius.circular(20),
             ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
                 blurRadius: 5,
                 offset: const Offset(0, 2),
-              )
+              ),
             ],
           ),
           child: Column(
@@ -256,7 +280,11 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
     );
   }
 
-  Widget _buildInputArea(double screenWidth, double screenHeight, double textScale) {
+  Widget _buildInputArea(
+    double screenWidth,
+    double screenHeight,
+    double textScale,
+  ) {
     return SafeArea(
       top: false,
       child: Container(
@@ -272,7 +300,11 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             IconButton(
-              icon: Icon(Icons.add_circle_outline, color: Colors.grey, size: screenWidth * 0.07),
+              icon: Icon(
+                Icons.add_circle_outline,
+                color: Colors.grey,
+                size: screenWidth * 0.07,
+              ),
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Attach Photo or PDF")),
@@ -304,11 +336,15 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
               ),
             ),
             CircleAvatar(
-              backgroundColor: primaryColor,
+              backgroundColor: AppColors.primaryColor,
               radius: screenWidth * 0.06,
               child: IconButton(
                 padding: EdgeInsets.zero,
-                icon: Icon(Icons.send, color: Colors.white, size: screenWidth * 0.05),
+                icon: Icon(
+                  Icons.send,
+                  color: Colors.white,
+                  size: screenWidth * 0.05,
+                ),
                 onPressed: _handleSendMessage,
               ),
             ),
@@ -322,7 +358,8 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
     if (_messageController.text.trim().isEmpty) return;
     final text = _messageController.text.trim();
 
-    bool triggerAi = text.toLowerCase().contains("buy") ||
+    bool triggerAi =
+        text.toLowerCase().contains("buy") ||
         text.toLowerCase().contains("bring") ||
         text.toLowerCase().contains("appointment");
 

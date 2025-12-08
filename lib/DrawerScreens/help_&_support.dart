@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-const Color primaryColor = Color(0xFF9B59B6);
+import '../AppColors/AppColors.dart';
 
 class HelpAndSupportScreen extends StatelessWidget {
   const HelpAndSupportScreen({Key? key}) : super(key: key);
@@ -18,7 +18,7 @@ class HelpAndSupportScreen extends StatelessWidget {
         style: TextStyle(
           fontSize: 0.045 * screenWidth,
           fontWeight: FontWeight.bold,
-          color: primaryColor,
+          color: AppColors.primaryColor,
         ),
       ),
     );
@@ -33,20 +33,37 @@ class HelpAndSupportScreen extends StatelessWidget {
     double? screenWidth,
   }) {
     return ListTile(
-      leading: Icon(icon, color: primaryColor, size: screenWidth != null ? 0.07 * screenWidth : 24),
+      leading: Icon(
+        icon,
+        color: AppColors.primaryColor,
+        size: screenWidth != null ? 0.07 * screenWidth : 24,
+      ),
       title: Text(
         title,
-        style: TextStyle(fontSize: screenWidth != null ? 0.04 * screenWidth : 16),
+        style: TextStyle(
+          fontSize: screenWidth != null ? 0.04 * screenWidth : 16,
+        ),
       ),
       subtitle: subtitle != null
           ? Text(
-        subtitle,
-        style: TextStyle(fontSize: screenWidth != null ? 0.035 * screenWidth : 14),
-      )
+              subtitle,
+              style: TextStyle(
+                fontSize: screenWidth != null ? 0.035 * screenWidth : 14,
+              ),
+            )
           : null,
-      trailing: trailing ?? Icon(Icons.chevron_right, color: Colors.grey, size: screenWidth != null ? 0.06 * screenWidth : 24),
+      trailing:
+          trailing ??
+          Icon(
+            Icons.chevron_right,
+            color: Colors.grey,
+            size: screenWidth != null ? 0.06 * screenWidth : 24,
+          ),
       onTap: onTap,
-      contentPadding: EdgeInsets.symmetric(horizontal: 0.04 * screenWidth!, vertical: 4),
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: 0.04 * screenWidth!,
+        vertical: 4,
+      ),
     );
   }
 
@@ -59,7 +76,7 @@ class HelpAndSupportScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Help & Support'),
-        backgroundColor: primaryColor,
+        backgroundColor: AppColors.primaryColor,
         foregroundColor: Colors.white,
         elevation: 4,
       ),
@@ -76,8 +93,9 @@ class HelpAndSupportScreen extends StatelessWidget {
                 icon: Icons.question_answer_outlined,
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Loading General FAQs...")));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Loading General FAQs...")),
+                  );
                 },
               ),
               _buildListTile(
@@ -85,8 +103,9 @@ class HelpAndSupportScreen extends StatelessWidget {
                 icon: Icons.security,
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Loading Safety FAQs...")));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Loading Safety FAQs...")),
+                  );
                 },
               ),
               _buildListTile(
@@ -94,8 +113,9 @@ class HelpAndSupportScreen extends StatelessWidget {
                 icon: Icons.monetization_on_outlined,
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Loading Billing FAQs...")));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Loading Billing FAQs...")),
+                  );
                 },
               ),
 
@@ -106,8 +126,9 @@ class HelpAndSupportScreen extends StatelessWidget {
                 icon: Icons.bug_report_outlined,
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Opening Bug Report form...")));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Opening Bug Report form...")),
+                  );
                 },
               ),
               _buildListTile(
@@ -115,19 +136,27 @@ class HelpAndSupportScreen extends StatelessWidget {
                 icon: Icons.email_outlined,
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Composing new email...")));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Composing new email...")),
+                  );
                 },
               ),
               _buildListTile(
                 title: 'Emergency Support Hotline',
                 icon: Icons.phone_forwarded,
                 subtitle: 'Available 24/7 for critical issues.',
-                trailing: Icon(Icons.call, color: Colors.red, size: 0.06 * screenWidth),
+                trailing: Icon(
+                  Icons.call,
+                  color: Colors.red,
+                  size: 0.06 * screenWidth,
+                ),
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Calling Emergency Hotline... (Mock)")));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Calling Emergency Hotline... (Mock)"),
+                    ),
+                  );
                 },
               ),
 
@@ -138,8 +167,11 @@ class HelpAndSupportScreen extends StatelessWidget {
                 icon: Icons.playlist_play,
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Starting task creation tutorial...")));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Starting task creation tutorial..."),
+                    ),
+                  );
                 },
               ),
               _buildListTile(
@@ -147,8 +179,11 @@ class HelpAndSupportScreen extends StatelessWidget {
                 icon: Icons.trending_up,
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Showing Escalation Guide...")));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Showing Escalation Guide..."),
+                    ),
+                  );
                 },
               ),
               _buildListTile(
@@ -156,8 +191,11 @@ class HelpAndSupportScreen extends StatelessWidget {
                 icon: Icons.people_alt_outlined,
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Showing Profile Linking Guide...")));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Showing Profile Linking Guide..."),
+                    ),
+                  );
                 },
               ),
               SizedBox(height: screenHeight * 0.05), // bottom spacing

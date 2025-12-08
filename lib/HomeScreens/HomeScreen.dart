@@ -1,29 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:reminder_app/Authentication_Onboarding/Login+Otp/FamilySetupScreen.dart';
-import 'package:reminder_app/DrawerScreens/FamilyPage.dart';
-import 'package:reminder_app/DrawerScreens/SettingScreen.dart';
-import 'package:reminder_app/DrawerScreens/help_&_support.dart';
-import 'package:reminder_app/DrawerScreens/notification.dart';
-import 'package:reminder_app/AddTaskScreen/AddTaskScreen.dart';
-import 'package:reminder_app/chatscreen/FamilyChatScreen.dart';
-import 'package:reminder_app/profilescreen/ProfileScreen.dart';
-import 'package:reminder_app/widgets/app_drawer.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 
-import '../DrawerScreens/Subscriptions_&_checkout.dart';
-
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
-  int _selectedIndex = 0;
+class _HomeScreenState extends State<HomeScreen> {
   final Color primaryColor = const Color(0xFF9B59B6);
 
   final List<Map<String, dynamic>> _tasks = [
@@ -75,44 +61,6 @@ class _HomeScreenState extends State<HomeScreen>
     },
   ];
 
-  bool _isInputBarOpen = false;
-  late AnimationController _animationController;
-  late TextEditingController _taskInputController;
-  late FocusNode _taskFocusNode;
-  late final List<Widget> _screens;
-
-  @override
-  void initState() {
-    super.initState();
-    _taskInputController = TextEditingController();
-    _taskFocusNode = FocusNode();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-    _initializeScreens();
-  }
-
-  void _initializeScreens() {
-    _screens = [
-      MainHomeContent(
-        key: GlobalKey<MainHomeContentState>(),
-        primaryColor: primaryColor,
-        tasks: _tasks,
-        onTaskAdded: _addTask,
-        onTaskRemoved: _removeTask,
-      ),
-      const FamilyChatScreen(),
-      AddTaskScreen(
-        onTaskAdded: (newTask) {
-          _addTask(newTask);
-          _onItemTapped(0);
-        },
-      ),
-      const ProfileScreen(),
-    ];
-  }
-
   void _addTask(Map<String, dynamic> newTask) {
     setState(() {
       _tasks.add(newTask);
@@ -131,111 +79,12 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   @override
-  void dispose() {
-    _animationController.dispose();
-    _taskInputController.dispose();
-    _taskFocusNode.dispose();
-    super.dispose();
-  }
-
-  void _onItemTapped(int index) {
-    if (index != 0 && _isInputBarOpen) {
-      _closeInputBar();
-    }
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  void _toggleInputBar() {
-    setState(() {
-      _isInputBarOpen = !_isInputBarOpen;
-    });
-    if (_isInputBarOpen) {
-      _animationController.forward().whenComplete(() {
-        FocusScope.of(context).requestFocus(_taskFocusNode);
-      });
-    } else {
-      _taskFocusNode.unfocus();
-      _animationController.reverse();
-    }
-  }
-
-  void _closeInputBar() {
-    setState(() {
-      _isInputBarOpen = false;
-    });
-    _taskFocusNode.unfocus();
-    _animationController.reverse();
-  }
-
-  void _handleQuickTaskSubmit(String value) {
-    if (value.isNotEmpty) {
-      final newTask = {
-        'title': value,
-        'status': 'urgent',
-        'icon': Icons.checklist_rtl,
-        'dueDate': DateTime.now()
-            .add(const Duration(hours: 1))
-            .toIso8601String(),
-        'done': false,
-        'assignees': ['Everyone'],
-        'taskType': 'standard',
-        'photoProofRequired': false,
-      };
-      _addTask(newTask);
-      _taskInputController.clear();
-      _toggleInputBar();
-    }
-  }
-
-  void _handleLogout() {
-    Navigator.pop(context);
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const FamilySetupScreen()),
-    );
-  }
-
-  void _handleProfileTap() {
-    Navigator.pop(context);
-    _onItemTapped(3);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: primaryColor,
-        statusBarIconBrightness: Brightness.light,
-      ),
-    );
-
-    final bool isHomeScreen = _selectedIndex == 0;
-    final Widget currentBody = _screens.elementAt(_selectedIndex);
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    return Scaffold(
-      backgroundColor: isHomeScreen ? primaryColor : Colors.white,
-      drawer: AppDrawer(
-        primaryColor: primaryColor,
-        onProfileTap: _handleProfileTap,
-        onLogout: _handleLogout,
-      ),
-
-      body: Stack(
-        children: [
-          currentBody,
-          // if (isHomeScreen)
-          //   SlidingInputBar(
-          //     isOpen: _isInputBarOpen,
-          //     screenWidth: screenWidth,
-          //     focusNode: _taskFocusNode,
-          //     controller: _taskInputController,
-          //     onSubmitted: _handleQuickTaskSubmit,
-          //   ),
-        ],
-      ),
+    return MainHomeContent(
+      primaryColor: primaryColor,
+      tasks: _tasks,
+      onTaskAdded: _addTask,
+      onTaskRemoved: _removeTask,
     );
   }
 }

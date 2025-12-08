@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reminder_app/AddTaskScreen/AddTaskScreen.dart';
+import 'package:reminder_app/AppColors/AppColors.dart';
 import 'package:reminder_app/DrawerScreens/Subscriptions_&_checkout.dart';
 import 'package:reminder_app/DrawerScreens/notification.dart';
 import 'package:reminder_app/DrawerScreens/quiet_hours.dart';
@@ -13,8 +14,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final Color primaryColor = const Color(0xFF9B59B6);
-
   final String userName = "Sarah";
   final String userRole = "Mom";
   final int tasksCompleted = 45;
@@ -85,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: primaryColor,
+        color: AppColors.primaryColor,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -339,7 +338,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               });
             },
             style: TextButton.styleFrom(
-              backgroundColor: primaryColor.withOpacity(0.1),
+              backgroundColor: AppColors.primaryColor.withOpacity(0.1),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -347,7 +346,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Text(
               _isSafetyPhraseVisible ? 'Hide' : 'Reveal',
               style: TextStyle(
-                color: primaryColor,
+                color: AppColors.primaryColor,
                 fontWeight: FontWeight.w600,
               ),
             ),

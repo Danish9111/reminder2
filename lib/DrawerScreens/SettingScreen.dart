@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../AppColors/AppColors.dart';
+
 // Primary color
-const Color primaryColor = Color(0xFF9B59B6);
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -22,16 +23,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSectionHeader(String title, double screenWidth) {
     return Padding(
       padding: EdgeInsets.only(
-          top: screenWidth * 0.06,
-          bottom: screenWidth * 0.02,
-          left: screenWidth * 0.04,
-          right: screenWidth * 0.04),
+        top: screenWidth * 0.06,
+        bottom: screenWidth * 0.02,
+        left: screenWidth * 0.04,
+        right: screenWidth * 0.04,
+      ),
       child: Text(
         title,
         style: TextStyle(
           fontSize: screenWidth * 0.045,
           fontWeight: FontWeight.bold,
-          color: primaryColor,
+          color: AppColors.primaryColor,
         ),
       ),
     );
@@ -47,13 +49,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
     double screenWidth = 16,
   }) {
     return ListTile(
-      leading: Icon(icon, color: primaryColor, size: screenWidth * 0.07),
+      leading: Icon(
+        icon,
+        color: AppColors.primaryColor,
+        size: screenWidth * 0.07,
+      ),
       title: Text(title, style: TextStyle(fontSize: screenWidth * 0.04)),
       subtitle: subtitle != null
           ? Text(subtitle, style: TextStyle(fontSize: screenWidth * 0.035))
           : null,
-      trailing: trailing ??
-          Icon(Icons.chevron_right, color: Colors.grey, size: screenWidth * 0.07),
+      trailing:
+          trailing ??
+          Icon(
+            Icons.chevron_right,
+            color: Colors.grey,
+            size: screenWidth * 0.07,
+          ),
       onTap: onTap,
       contentPadding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
     );
@@ -85,30 +96,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        backgroundColor: primaryColor,
+        backgroundColor: AppColors.primaryColor,
         foregroundColor: Colors.white,
         elevation: 4,
       ),
       body: Padding(
-        padding: EdgeInsets.only(bottom: screenWidth * 0.08), // Extra bottom spacing
+        padding: EdgeInsets.only(
+          bottom: screenWidth * 0.08,
+        ), // Extra bottom spacing
         child: ListView(
           children: <Widget>[
             // --- Profile Management ---
             _buildSectionHeader('Profile Management', screenWidth),
-            ..._profiles.map((profile) => _buildListTile(
-              title: profile,
-              icon: Icons.person_outline,
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text("Editing profile: ${profile.split(' ')[0]}")));
-              },
-              screenWidth: screenWidth,
-            )),
+            ..._profiles.map(
+              (profile) => _buildListTile(
+                title: profile,
+                icon: Icons.person_outline,
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        "Editing profile: ${profile.split(' ')[0]}",
+                      ),
+                    ),
+                  );
+                },
+                screenWidth: screenWidth,
+              ),
+            ),
 
             // --- Quiet Hours ---
             _buildSectionHeader('Quiet Hours', screenWidth),
             ListTile(
-              leading: Icon(Icons.nights_stay, color: primaryColor, size: screenWidth * 0.07),
+              leading: Icon(
+                Icons.nights_stay,
+                color: AppColors.primaryColor,
+                size: screenWidth * 0.07,
+              ),
               title: const Text('Enable Quiet Hours'),
               subtitle: Text(
                 'Notifications are muted between ${_quietStartTime.format(context)} and ${_quietEndTime.format(context)}',
@@ -116,7 +140,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               trailing: Switch(
                 value: _quietHoursEnabled,
-                activeColor: primaryColor,
+                activeColor: AppColors.primaryColor,
                 onChanged: (bool value) {
                   setState(() {
                     _quietHoursEnabled = value;
@@ -143,7 +167,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildSectionHeader('Safety-Critical Escalation', screenWidth),
             Padding(
               padding: EdgeInsets.symmetric(
-                  horizontal: screenWidth * 0.04, vertical: screenWidth * 0.02),
+                horizontal: screenWidth * 0.04,
+                vertical: screenWidth * 0.02,
+              ),
               child: Row(
                 children: [
                   Expanded(
@@ -158,7 +184,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text(
                     '${_escalationIntervalMinutes.round()} minutes',
                     style: TextStyle(
-                        fontSize: screenWidth * 0.038, fontWeight: FontWeight.bold),
+                      fontSize: screenWidth * 0.038,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -196,8 +224,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: 'Subscription & Billing',
               icon: Icons.credit_card,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text("Opening Subscription Management...")));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Opening Subscription Management..."),
+                  ),
+                );
               },
               screenWidth: screenWidth,
             ),
@@ -205,18 +236,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: 'Download Data',
               icon: Icons.download,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text("Preparing data for download...")));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Preparing data for download..."),
+                  ),
+                );
               },
               screenWidth: screenWidth,
             ),
             _buildListTile(
               title: 'Delete My Account and Data',
               icon: Icons.delete_forever,
-              trailing: Icon(Icons.warning_amber, color: Colors.red, size: screenWidth * 0.07),
+              trailing: Icon(
+                Icons.warning_amber,
+                color: Colors.red,
+                size: screenWidth * 0.07,
+              ),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text("Confirming account deletion...")));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Confirming account deletion..."),
+                  ),
+                );
               },
               screenWidth: screenWidth,
             ),

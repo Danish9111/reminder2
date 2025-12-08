@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
-const Color primaryColor = Color(0xFF9B59B6);
+import 'package:reminder_app/DrawerScreens/SubscriptionConfirm.dart'
+    as AppColors;
 
 class PrivacyScreen extends StatefulWidget {
   const PrivacyScreen({Key? key}) : super(key: key);
@@ -83,7 +83,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Row(
           children: [
-            Icon(Icons.download, color: primaryColor, size: 28),
+            Icon(Icons.download, color: AppColors.primaryColor, size: 28),
             SizedBox(width: 12),
             Text('Export Your Data'),
           ],
@@ -107,7 +107,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: primaryColor,
+              backgroundColor: AppColors.primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -125,7 +125,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: const Text('Privacy'),
-        backgroundColor: primaryColor,
+        backgroundColor: AppColors.primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -151,7 +151,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
                   children: [
                     _buildToggleItem(
                       icon: Icons.task_alt,
-                      iconColor: primaryColor,
+                      iconColor: AppColors.primaryColor,
                       title: 'Share Tasks',
                       subtitle: 'Family members can see your assigned tasks',
                       value: _shareTasksWithFamily,
@@ -197,7 +197,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
                   children: [
                     _buildToggleItem(
                       icon: Icons.person,
-                      iconColor: primaryColor,
+                      iconColor: AppColors.primaryColor,
                       title: 'Show Profile',
                       subtitle: 'Let family members view your profile',
                       value: _showProfileToFamily,
@@ -243,7 +243,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
                   children: [
                     _buildToggleItem(
                       icon: Icons.pin,
-                      iconColor: primaryColor,
+                      iconColor: AppColors.primaryColor,
                       title: 'App Lock',
                       subtitle: 'Require PIN to open the app',
                       value: _requirePinForApp,
@@ -289,7 +289,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
                   children: [
                     _buildActionItem(
                       icon: Icons.download,
-                      iconColor: primaryColor,
+                      iconColor: AppColors.primaryColor,
                       title: 'Export My Data',
                       subtitle: 'Download a copy of your information',
                       onTap: _showExportDataDialog,
@@ -390,7 +390,11 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
               ],
             ),
           ),
-          Switch(value: value, activeColor: primaryColor, onChanged: onChanged),
+          Switch(
+            value: value,
+            activeColor: AppColors.primaryColor,
+            onChanged: onChanged,
+          ),
         ],
       ),
     );

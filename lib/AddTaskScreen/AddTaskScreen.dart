@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:reminder_app/AppColors/AppColors.dart';
 
 enum TaskType { standard, safetyCritical }
 
@@ -16,7 +17,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   static const platform = MethodChannel('com.example.reminder_app/alarm');
 
   final TextEditingController _taskController = TextEditingController();
-  final Color primaryColor = const Color(0xFF9B59B6);
 
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
@@ -84,7 +84,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         return Theme(
           data: ThemeData.light().copyWith(
             colorScheme: ColorScheme.light(
-              primary: primaryColor,
+              primary: AppColors.primaryColor,
               onPrimary: Colors.white,
               onSurface: Colors.black,
             ),
@@ -281,19 +281,19 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           horizontal: screenWidth * 0.02,
         ),
         decoration: BoxDecoration(
-          color: primaryColor.withOpacity(0.1),
+          color: AppColors.primaryColor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: primaryColor),
+            Icon(icon, color: AppColors.primaryColor),
             SizedBox(width: screenWidth * 0.02),
             Flexible(
               child: Text(
                 label,
                 style: TextStyle(
-                  color: primaryColor,
+                  color: AppColors.primaryColor,
                   fontWeight: FontWeight.w600,
                   fontSize: 14 * textScale,
                 ),
@@ -441,7 +441,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       padding: EdgeInsets.all(width * 0.04),
       color: Colors.white,
       child: ElevatedButton(
-        style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primaryColor,
+        ),
         onPressed: _addTask,
         child: Text(
           "Add Task",

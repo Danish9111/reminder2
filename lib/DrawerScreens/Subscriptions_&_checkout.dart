@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:reminder_app/DrawerScreens/SubscriptionConfirm.dart';
 import 'package:reminder_app/widgets/custom_button.dart';
 
-const Color primaryColor = Color(0xFF9B55B6);
-const Color accentColor = Color(0xFFE0BBE4);
-
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});
 
