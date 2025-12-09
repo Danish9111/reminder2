@@ -440,6 +440,7 @@ class FamilyScreen extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Family Dashboard'),
         backgroundColor: AppColors.primaryColor,

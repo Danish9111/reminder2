@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:reminder_app/DrawerScreens/SubscriptionConfirm.dart'
+    as AppColors;
+import 'package:reminder_app/widgets/custom_button.dart';
+import 'package:reminder_app/widgets/custom_snackbar.dart';
+import 'package:reminder_app/services/auth_service.dart';
+import 'package:reminder_app/services/firestore_service.dart';
 
 import 'FirstTaskTutorialScreen.dart';
 
 class FamilySetupScreen extends StatefulWidget {
-  const FamilySetupScreen({Key? key}) : super(key: key);
+  const FamilySetupScreen({super.key});
 
   @override
   State<FamilySetupScreen> createState() => _FamilySetupScreenState();
@@ -45,7 +51,7 @@ class _FamilySetupScreenState extends State<FamilySetupScreen> {
                           style: TextStyle(
                             fontSize: screenHeight * 0.035,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF34495E),
+                            color: AppColors.primaryColor,
                           ),
                         ),
                         SizedBox(height: screenHeight * 0.01),
@@ -80,11 +86,17 @@ class _FamilySetupScreenState extends State<FamilySetupScreen> {
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Color(0xFFECF0F1), width: 2),
+                          borderSide: BorderSide(
+                            color: Color(0xFFECF0F1),
+                            width: 1,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Color(0xFF9B59B6), width: 2),
+                          borderSide: BorderSide(
+                            color: Color(0xFF9B59B6),
+                            width: 1,
+                          ),
                         ),
                       ),
                     ),
@@ -131,7 +143,11 @@ class _FamilySetupScreenState extends State<FamilySetupScreen> {
                           CircleAvatar(
                             radius: screenHeight * 0.035,
                             backgroundColor: Color(0xFF9B59B6),
-                            child: Icon(Icons.person, color: Colors.white, size: screenHeight * 0.035),
+                            child: Icon(
+                              Icons.person,
+                              color: Colors.white,
+                              size: screenHeight * 0.035,
+                            ),
                           ),
                           SizedBox(width: screenWidth * 0.03),
                           Expanded(
@@ -182,7 +198,7 @@ class _FamilySetupScreenState extends State<FamilySetupScreen> {
 
                     // Added Members List
                     ..._members.map(
-                          (member) => Padding(
+                      (member) => Padding(
                         padding: EdgeInsets.only(bottom: screenHeight * 0.015),
                         child: Container(
                           padding: EdgeInsets.all(screenHeight * 0.018),
@@ -219,14 +235,19 @@ class _FamilySetupScreenState extends State<FamilySetupScreen> {
                                       'Family Member',
                                       style: TextStyle(
                                         fontSize: screenHeight * 0.014,
-                                        color: Color(0xFF34495E).withOpacity(0.6),
+                                        color: Color(
+                                          0xFF34495E,
+                                        ).withOpacity(0.6),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.close, color: Color(0xFFE74C3C)),
+                                icon: Icon(
+                                  Icons.close,
+                                  color: Color(0xFFE74C3C),
+                                ),
                                 onPressed: () {
                                   setState(() {
                                     _members.remove(member);
@@ -254,8 +275,13 @@ class _FamilySetupScreenState extends State<FamilySetupScreen> {
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: screenHeight * 0.018),
-                        side: BorderSide(color: Color(0xFF9B59B6), width: 2),
+                        padding: EdgeInsets.symmetric(
+                          vertical: screenHeight * 0.018,
+                        ),
+                        side: BorderSide(
+                          color: AppColors.primaryColor,
+                          width: 1,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -270,14 +296,20 @@ class _FamilySetupScreenState extends State<FamilySetupScreen> {
                         decoration: BoxDecoration(
                           color: Color(0xFF1ABC9C).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Color(0xFF1ABC9C).withOpacity(0.3)),
+                          border: Border.all(
+                            color: Color(0xFF1ABC9C).withOpacity(0.3),
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.check_circle, color: Color(0xFF2ECC71), size: 20),
+                                Icon(
+                                  Icons.check_circle,
+                                  color: Color(0xFF2ECC71),
+                                  size: 20,
+                                ),
                                 SizedBox(width: screenWidth * 0.02),
                                 Text(
                                   'Magic Link Generated!',
@@ -313,13 +345,13 @@ class _FamilySetupScreenState extends State<FamilySetupScreen> {
                                     icon: Icon(Icons.copy, size: 20),
                                     color: Color(0xFF9B59B6),
                                     onPressed: () {
-                                      Clipboard.setData(ClipboardData(text: _inviteLink!));
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('Link copied!'),
-                                          backgroundColor: Color(0xFF27AE60),
-                                          duration: Duration(seconds: 2),
-                                        ),
+                                      Clipboard.setData(
+                                        ClipboardData(text: _inviteLink!),
+                                      );
+                                      CustomSnackbar.show(
+                                        title: "Success",
+                                        message: 'Link copied!',
+                                        duration: Duration(seconds: 2),
                                       );
                                     },
                                   ),
@@ -346,47 +378,57 @@ class _FamilySetupScreenState extends State<FamilySetupScreen> {
             ),
 
             // Continue Button
-            Container(
-              width: double.infinity,
+            Padding(
               padding: EdgeInsets.all(screenWidth * 0.06),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: ElevatedButton(
+              child: CustomButton(
                 onPressed: _isLoading ? null : _completeSetup,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF9B59B6),
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: _isLoading
-                    ? SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-                    : Text(
-                  'Continue',
-                  style: TextStyle(
-                    fontSize: screenHeight * 0.022,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                text: 'Continue',
+                isLoading: _isLoading,
               ),
             ),
+            // Container(
+            //   width: double.infinity,
+            //   padding: EdgeInsets.all(screenWidth * 0.06),
+            //   decoration: BoxDecoration(
+            //     color: Colors.white,
+            //     boxShadow: [
+            //       BoxShadow(
+            //         color: Colors.black.withOpacity(0.05),
+            //         blurRadius: 10,
+            //         offset: Offset(0, -5),
+            //       ),
+            //     ],
+            //   ),
+            //   child: ElevatedButton(
+            //     onPressed: _isLoading ? null : _completeSetup,
+            //     style: ElevatedButton.styleFrom(
+            //       backgroundColor: Color(0xFF9B59B6),
+            //       foregroundColor: Colors.white,
+            //       padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
+            //       shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(12),
+            //       ),
+            //     ),
+            //     child: _isLoading
+            //         ? SizedBox(
+            //             height: 20,
+            //             width: 20,
+            //             child: CircularProgressIndicator(
+            //               strokeWidth: 2,
+            //               valueColor: AlwaysStoppedAnimation<Color>(
+            //                 Colors.white,
+            //               ),
+            //             ),
+            //           )
+            //         : Text(
+            //             'Continue',
+            //             style: TextStyle(
+            //               fontSize: screenHeight * 0.022,
+            //               fontWeight: FontWeight.w600,
+            //             ),
+            //           ),
+            //   ),
+            // ),
           ],
         ),
       ),
@@ -399,28 +441,47 @@ class _FamilySetupScreenState extends State<FamilySetupScreen> {
     });
   }
 
-  void _completeSetup() {
+  Future<void> _completeSetup() async {
     if (_familyNameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please enter a family name'),
-          backgroundColor: Color(0xFFE74C3C),
-        ),
-      );
+      CustomSnackbar.show(title: "Opps", message: "Please enter a family name");
       return;
     }
 
     setState(() => _isLoading = true);
 
-    Future.delayed(Duration(seconds: 2), () {
-      setState(() => _isLoading = false);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => FirstTaskTutorialScreen(),
-        ),
-      );
-    });
+    try {
+      final authService = AuthService();
+      final user = authService.currentUser;
+
+      if (user != null) {
+        final firestoreService = FirestoreService();
+        await firestoreService.createFamily(
+          user.uid,
+          _familyNameController.text.trim(),
+        );
+
+        if (mounted) {
+          setState(() => _isLoading = false);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => FirstTaskTutorialScreen()),
+          );
+        }
+      } else {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          CustomSnackbar.show(title: "Error", message: "User not logged in");
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        CustomSnackbar.show(
+          title: "Error",
+          message: "Failed to create family: $e",
+        );
+      }
+    }
   }
 
   @override

@@ -48,10 +48,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     super.dispose();
   }
 
-  Future<void> _takePhoto() async {
+  Future<void> _pickImage(ImageSource source) async {
     try {
       final XFile? photo = await _imagePicker.pickImage(
-        source: ImageSource.camera,
+        source: source,
         imageQuality: 80,
       );
       if (photo != null) {
@@ -60,13 +60,47 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         });
       }
     } catch (e) {
-      print('Error taking photo: $e');
+      print('Error picking image: $e');
       CustomSnackbar.show(
         title: 'Error',
-        message: 'Failed to take photo',
+        message: 'Failed to pick image',
         icon: Icons.error_outline,
       );
     }
+  }
+
+  void _showImageSourceOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Take a photo'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from gallery'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _removePhoto() {
@@ -457,7 +491,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
                             if (_capturedImage == null)
                               GestureDetector(
-                                onTap: _takePhoto,
+                                onTap: _showImageSourceOptions,
                                 child: Container(
                                   width: double.infinity,
                                   height: 120,
@@ -478,7 +512,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
-                                        "Tap to take photo",
+                                        "Tap to add photo",
                                         style: TextStyle(
                                           color: Colors.grey.shade600,
                                           fontSize: 14,

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:reminder_app/Authentication_Onboarding/Login+Otp/FamilySetupScreen.dart';
+import 'package:reminder_app/Authentication_Onboarding/Login+Otp/OtpVerificationScreen.dart';
+
+import 'package:reminder_app/auth_wrapper.dart';
 import 'package:reminder_app/bottom_navigation_bar.dart';
 import 'package:reminder_app/providers/task_provider.dart';
 import 'package:reminder_app/widgets/custom_snackbar.dart';
@@ -20,14 +24,15 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => TaskProvider(),
       child: MaterialApp(
-        navigatorKey: navigatorKey, // Required for GlassSnackbar
+        navigatorKey: navigatorKey, // Required for Snackbar
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF9B59B6)),
           useMaterial3: true,
         ),
-        home: const BottomNavigationScreen(),
+        // home: const BottomNavigationScreen(),
+        home: const AuthWrapper(),
       ),
     );
   }

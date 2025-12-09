@@ -11,11 +11,11 @@ class AppDrawer extends StatelessWidget {
   final VoidCallback onLogout;
 
   const AppDrawer({
-    Key? key,
+    super.key,
     required this.primaryColor,
     required this.onProfileTap,
     required this.onLogout,
-  }) : super(key: key);
+  });
 
   Widget _buildDrawerItem({
     required IconData icon,
@@ -32,6 +32,7 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: Colors.white,
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[

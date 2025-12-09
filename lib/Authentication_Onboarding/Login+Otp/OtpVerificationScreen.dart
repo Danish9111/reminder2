@@ -1,23 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:reminder_app/widgets/custom_button.dart';
+import 'package:reminder_app/widgets/custom_snackbar.dart';
 
-import 'FamilySetupScreen.dart';
+import 'package:reminder_app/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:reminder_app/auth_wrapper.dart';
+import 'package:reminder_app/auth_wrapper.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
   final String phoneNumber;
+  final String? verificationId;
 
   const OTPVerificationScreen({
-    Key? key,
-    this.phoneNumber = '+1 234 567 8900',
-  }) : super(key: key);
+    super.key,
+    this.phoneNumber = '+923120708550',
+    this.verificationId,
+  });
 
   @override
   State<OTPVerificationScreen> createState() => _OTPVerificationScreenState();
 }
 
 class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
-  final List<TextEditingController> _otpControllers =
-  List.generate(6, (index) => TextEditingController());
+  final List<TextEditingController> _otpControllers = List.generate(
+    6,
+    (index) => TextEditingController(),
+  );
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
   bool _isLoading = false;
 
@@ -28,7 +37,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     const double padding = 24.0;
     const double spacing = 8.0;
 
-    final double availableWidthForBoxes = screenWidth - (2 * padding) - (5 * spacing);
+    final double availableWidthForBoxes =
+        screenWidth - (2 * padding) - (5 * spacing);
     final double otpBoxWidth = (availableWidthForBoxes / 6).clamp(40.0, 50.0);
 
     return Scaffold(
@@ -47,9 +57,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
             return SingleChildScrollView(
               padding: EdgeInsets.all(padding),
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: IntrinsicHeight(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -86,7 +94,9 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(6, (index) {
                           return Padding(
-                            padding: EdgeInsets.only(right: index < 5 ? spacing : 0),
+                            padding: EdgeInsets.only(
+                              right: index < 5 ? spacing : 0,
+                            ),
                             child: SizedBox(
                               width: otpBoxWidth,
                               height: 60,
@@ -101,20 +111,31 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                                   fontWeight: FontWeight.bold,
                                   color: Color(0xFF34495E),
                                 ),
-                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
                                 decoration: InputDecoration(
                                   counterText: '',
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Color(0xFFECF0F1), width: 2),
+                                    borderSide: BorderSide(
+                                      color: Color(0xFFECF0F1),
+                                      width: 2,
+                                    ),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Color(0xFFECF0F1), width: 2),
+                                    borderSide: BorderSide(
+                                      color: Color(0xFFECF0F1),
+                                      width: 2,
+                                    ),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Color(0xFF9B59B6), width: 2),
+                                    borderSide: BorderSide(
+                                      color: Color(0xFF9B59B6),
+                                      width: 2,
+                                    ),
                                   ),
                                 ),
                                 onChanged: (value) {
@@ -136,34 +157,10 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                       ),
 
                       SizedBox(height: 32),
-
-                      // Verify Button
-                      ElevatedButton(
+                      CustomButton(
                         onPressed: _isLoading ? null : _verifyOTP,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF9B59B6),
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: _isLoading
-                            ? SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                            : Text(
-                          'Verify',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        text: 'Verify',
+                        isLoading: _isLoading,
                       ),
 
                       SizedBox(height: 24),
@@ -206,37 +203,58 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     );
   }
 
-  void _verifyOTP() {
+  Future<void> _verifyOTP() async {
     String otp = _otpControllers.map((c) => c.text).join();
 
     if (otp.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please enter the complete 6-digit code'),
-          backgroundColor: Color(0xFFE74C3C),
-        ),
+      CustomSnackbar.show(
+        title: "Opps",
+        message: 'Please enter the complete 6-digit code',
       );
       return;
     }
 
     setState(() => _isLoading = true);
 
-    Future.delayed(Duration(seconds: 2), () {
-      setState(() => _isLoading = false);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => FamilySetupScreen()),
-      );
-    });
+    try {
+      final authService = AuthService();
+      User? user;
+
+      if (widget.verificationId != null) {
+        // Real SMS Verification
+        user = await authService.signInWithOTP(
+          verificationId: widget.verificationId!,
+          smsCode: otp,
+        );
+      } else {
+        // Fallback or Test Mode (If we ever use it without SMS)
+        // For now, if no verificationId, we can't verify properly.
+        user = authService.currentUser; // Check if already anonymous?
+      }
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+        if (user != null) {
+          // Success! Clear stack and let AuthWrapper decide where to go
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const AuthWrapper()),
+            (route) => false, // Remove all previous routes
+          );
+        } else {
+          CustomSnackbar.show(title: "Error", message: "Invalid Code");
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        CustomSnackbar.show(title: "Error", message: e.toString());
+      }
+    }
   }
 
   void _resendOTP() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('OTP sent successfully!'),
-        backgroundColor: Color(0xFF27AE60),
-      ),
-    );
+    CustomSnackbar.show(title: "Success", message: 'OTP sent successfully!');
   }
 
   @override

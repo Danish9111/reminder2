@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reminder_app/bottom_navigation_bar.dart';
+import 'package:reminder_app/widgets/custom_button.dart';
 
 class FirstTaskTutorialScreen extends StatefulWidget {
   const FirstTaskTutorialScreen({Key? key}) : super(key: key);
@@ -144,7 +145,7 @@ class _FirstTaskTutorialScreenState extends State<FirstTaskTutorialScreen> {
                   children: [
                     SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton(
+                      child: CustomButton(
                         onPressed: () {
                           if (_currentStep < _tutorialSteps.length - 1) {
                             _pageController.nextPage(
@@ -155,26 +156,13 @@ class _FirstTaskTutorialScreenState extends State<FirstTaskTutorialScreen> {
                             _completeTutorial();
                           }
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF9B59B6),
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(
-                            vertical: screenHeight * 0.02,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          _currentStep < _tutorialSteps.length - 1
-                              ? 'Next'
-                              : 'Create My First Task',
-                          style: TextStyle(
-                            fontSize: screenHeight * 0.022,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        text: _currentStep < _tutorialSteps.length - 1
+                            ? 'Next'
+                            : 'Create My First Task',
+                        backgroundColor: Color(0xFF9B59B6),
+                        textColor: Colors.white,
+
+                        borderRadius: 12,
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.015),
