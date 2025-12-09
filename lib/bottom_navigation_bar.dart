@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:reminder_app/AppColors/AppColors.dart';
+
 import 'package:reminder_app/HomeScreens/HomeScreen.dart';
 import 'package:reminder_app/AddTaskScreen/AddTaskScreen.dart';
 import 'package:reminder_app/chatscreen/FamilyChatScreen.dart';
@@ -33,7 +35,7 @@ class BottomNavConfig {
 }
 
 class BottomNavigationScreen extends StatefulWidget {
-  const BottomNavigationScreen({Key? key}) : super(key: key);
+  const BottomNavigationScreen({super.key});
 
   @override
   State<BottomNavigationScreen> createState() => _BottomNavigationScreenState();
@@ -41,7 +43,6 @@ class BottomNavigationScreen extends StatefulWidget {
 
 class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
   int _selectedIndex = 0;
-  final Color primaryColor = const Color(0xFF9B59B6);
 
   final List<Widget> _screens = const [
     HomeScreen(),
@@ -73,15 +74,17 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
-        statusBarColor: primaryColor,
+        statusBarColor: AppColors.primaryColor,
         statusBarIconBrightness: Brightness.light,
       ),
     );
 
     return Scaffold(
-      backgroundColor: _selectedIndex == 0 ? primaryColor : Colors.white,
+      backgroundColor: _selectedIndex == 0
+          ? AppColors.primaryColor
+          : Colors.white,
       drawer: AppDrawer(
-        primaryColor: primaryColor,
+        primaryColor: AppColors.primaryColor,
         onProfileTap: _handleProfileTap,
         onLogout: _handleLogout,
       ),
@@ -93,7 +96,7 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        backgroundColor: primaryColor,
+        backgroundColor: AppColors.primaryColor,
         iconTheme: const IconThemeData(color: Colors.white),
         automaticallyImplyLeading: true,
         actions: [
@@ -118,7 +121,7 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: primaryColor,
+        selectedItemColor: AppColors.primaryColor,
         unselectedItemColor: Colors.grey,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

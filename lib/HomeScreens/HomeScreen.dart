@@ -103,78 +103,172 @@ class TaskCard extends StatelessWidget {
   final VoidCallback onRemove;
 
   const TaskCard({
-    Key? key,
+    super.key,
     required this.task,
     required this.primaryColor,
     required this.onRemove,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     final dueDate = DateTime.parse(task['dueDate']);
     final formattedTime = DateFormat('hh:mm a').format(dueDate);
     final isSafetyCritical = task['taskType'] == 'safetyCritical';
-    final taskColor = isSafetyCritical ? Colors.red.shade700 : primaryColor;
+    final taskColor = isSafetyCritical ? Colors.red.shade600 : primaryColor;
     final taskIcon = isSafetyCritical
         ? Icons.shield_outlined
-        : Icons.checklist_rtl;
+        : Icons.check_circle_outline;
+
+    // Extract just the task name (remove date/time from title if present)
+    final taskTitle = task['title'].toString().split(' - ')[0];
+    final assignees = (task['assignees'] as List?)?.join(', ') ?? '';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 0),
       decoration: BoxDecoration(
-        color: isSafetyCritical ? Colors.red.shade50 : const Color(0xFFEBE0F4),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isSafetyCritical ? Colors.red.shade200 : Colors.grey.shade200,
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 3,
+            color: isSafetyCritical
+                ? Colors.red.withOpacity(0.08)
+                : Colors.grey.withOpacity(0.08),
+            blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Icon(taskIcon, color: taskColor, size: 24),
-          ),
-          Container(
-            width: 2,
-            height: 48,
-            color: taskColor,
-            margin: const EdgeInsets.only(right: 12),
-          ),
-          Expanded(
-            child: Text(
-              task['title'],
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
-                fontWeight: FontWeight.w500,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Row(
+          children: [
+            // Left accent bar
+            Container(width: 4, height: 90, color: taskColor),
+            // Content
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                child: Row(
+                  children: [
+                    // Icon circle
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: taskColor.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(taskIcon, color: taskColor, size: 22),
+                    ),
+                    const SizedBox(width: 14),
+                    // Task details
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            taskTitle,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time_rounded,
+                                size: 14,
+                                color: Colors.grey.shade500,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                formattedTime,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              if (assignees.isNotEmpty) ...[
+                                const SizedBox(width: 12),
+                                Icon(
+                                  Icons.person_outline,
+                                  size: 14,
+                                  color: Colors.grey.shade500,
+                                ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    assignees,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          if (isSafetyCritical) ...[
+                            const SizedBox(height: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade50,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'CRITICAL',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red.shade700,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    // Action button
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: onRemove,
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          child: Icon(
+                            Icons.check_circle,
+                            color: Colors.grey.shade400,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          Text(
-            formattedTime,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: taskColor,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Icon(Icons.access_time_filled, color: taskColor, size: 16),
-          const SizedBox(width: 4),
-          InkWell(
-            onTap: onRemove,
-            child: const Padding(
-              padding: EdgeInsets.only(right: 16.0, left: 8.0),
-              child: Icon(Icons.close, color: Colors.grey, size: 20),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -281,12 +375,12 @@ class GroupedTaskList extends StatelessWidget {
   final Function(Map<String, dynamic>) onTaskRemoved;
 
   const GroupedTaskList({
-    Key? key,
+    super.key,
     required this.tasks,
     required this.selectedDay,
     required this.primaryColor,
     required this.onTaskRemoved,
-  }) : super(key: key);
+  });
 
   Map<String, List<Map<String, dynamic>>> _getTasksByDate() {
     final Map<String, List<Map<String, dynamic>>> groupedTasks = {};
@@ -762,7 +856,7 @@ class MainHomeContentState extends State<MainHomeContent> {
                   onPreviousWeek: _goToPreviousWeek,
                   onNextWeek: _goToNextWeek,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
