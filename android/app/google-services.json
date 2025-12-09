@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "678458683520",
+    "firebase_url": "https://reminder-app-b5225-default-rtdb.firebaseio.com",
+    "project_id": "reminder-app-b5225",
+    "storage_bucket": "reminder-app-b5225.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:678458683520:android:3bb53688b6f516c3533665",
+        "android_client_info": {
+          "package_name": "com.example.reminder_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7_brqaYda4tc6_jaR2gCJi1pPlUOPfhY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

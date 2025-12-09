@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:reminder_app/widgets/custom_snackbar.dart';
 
 import '../AppColors/AppColors.dart';
 
 // Primary color
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  const SettingsScreen({super.key});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -113,12 +114,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: profile,
                 icon: Icons.person_outline,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        "Editing profile: ${profile.split(' ')[0]}",
-                      ),
-                    ),
+                  CustomSnackbar.show(
+                    title: "",
+                    message: "ediing profile $profile",
                   );
                 },
                 screenWidth: screenWidth,
@@ -224,10 +222,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: 'Subscription & Billing',
               icon: Icons.credit_card,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Opening Subscription Management..."),
-                  ),
+                CustomSnackbar.show(
+                  title: 'Subscription',
+                  message: 'Opening Subscription Management...',
+                  icon: Icons.credit_card,
                 );
               },
               screenWidth: screenWidth,
@@ -236,10 +234,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: 'Download Data',
               icon: Icons.download,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Preparing data for download..."),
-                  ),
+                CustomSnackbar.show(
+                  title: 'Download',
+                  message: 'Preparing data for download...',
+                  icon: Icons.download,
                 );
               },
               screenWidth: screenWidth,
@@ -253,10 +251,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 size: screenWidth * 0.07,
               ),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Confirming account deletion..."),
-                  ),
+                CustomSnackbar.show(
+                  title: 'Delete Account',
+                  message: 'Confirming account deletion...',
+                  icon: Icons.delete_forever,
                 );
               },
               screenWidth: screenWidth,

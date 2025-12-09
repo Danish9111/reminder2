@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:reminder_app/providers/task_provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 
@@ -12,79 +14,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final Color primaryColor = const Color(0xFF9B59B6);
 
-  final List<Map<String, dynamic>> _tasks = [
-    {
-      'title': "Azya Azy scho - Today 10:00 AM",
-      'status': 'urgent',
-      'icon': Icons.checklist_rtl,
-      'dueDate': DateTime.now().toIso8601String(),
-      'done': false,
-      'assignees': ['Hazrat', 'Azy'],
-      'taskType': 'standard',
-      'photoProofRequired': false,
-    },
-    {
-      'title': 'Pick up Azy for piano - Tomorrow 5:00 PM',
-      'status': 'urgent',
-      'icon': Icons.checklist_rtl,
-      'dueDate': DateTime.now()
-          .add(const Duration(days: 1, hours: 2))
-          .toIso8601String(),
-      'done': false,
-      'assignees': ['Hazrat'],
-      'taskType': 'standard',
-      'photoProofRequired': false,
-    },
-    {
-      'title': 'Take medicine - Critical',
-      'status': 'critical',
-      'icon': Icons.shield_outlined,
-      'dueDate': DateTime.now()
-          .add(const Duration(minutes: 30))
-          .toIso8601String(),
-      'done': false,
-      'assignees': ['Azy'],
-      'taskType': 'safetyCritical',
-      'photoProofRequired': true,
-    },
-    {
-      'title': 'Future Task: Birthday Party Prep',
-      'status': 'urgent',
-      'icon': Icons.checklist_rtl,
-      'dueDate': DateTime.now()
-          .add(const Duration(days: 3, hours: 10))
-          .toIso8601String(),
-      'done': false,
-      'assignees': ['Hazrat', 'Azy'],
-      'taskType': 'standard',
-      'photoProofRequired': false,
-    },
-  ];
-
-  void _addTask(Map<String, dynamic> newTask) {
-    setState(() {
-      _tasks.add(newTask);
-      _tasks.sort(
-        (a, b) => DateTime.parse(
-          a['dueDate'],
-        ).compareTo(DateTime.parse(b['dueDate'])),
-      );
-    });
-  }
-
-  void _removeTask(Map<String, dynamic> task) {
-    setState(() {
-      _tasks.removeWhere((t) => t == task);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    final tasks = context.watch<TaskProvider>().tasks;
+
     return MainHomeContent(
       primaryColor: primaryColor,
-      tasks: _tasks,
-      onTaskAdded: _addTask,
-      onTaskRemoved: _removeTask,
+      tasks: tasks,
+      onTaskRemoved: (task) => context.read<TaskProvider>().removeTask(task),
     );
   }
 }
@@ -144,130 +81,145 @@ class TaskCard extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Row(
-          children: [
-            // Left accent bar
-            Container(width: 4, height: 90, color: taskColor),
-            // Content
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                child: Row(
-                  children: [
-                    // Icon circle
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: taskColor.withOpacity(0.1),
-                        shape: BoxShape.circle,
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              // Left accent bar
+              Container(width: 4, color: taskColor),
+              // Content
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 3,
+                    vertical: 14,
+                  ),
+                  child: Row(
+                    children: [
+                      // Icon circle
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: taskColor.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(taskIcon, color: taskColor, size: 22),
                       ),
-                      child: Icon(taskIcon, color: taskColor, size: 22),
-                    ),
-                    const SizedBox(width: 14),
-                    // Task details
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            taskTitle,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.access_time_rounded,
-                                size: 14,
-                                color: Colors.grey.shade500,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                formattedTime,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey.shade600,
-                                  fontWeight: FontWeight.w500,
+                      const SizedBox(width: 5),
+                      // Task details
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    taskTitle,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              if (assignees.isNotEmpty) ...[
-                                const SizedBox(width: 12),
+                                SizedBox(width: 5),
+                                if (isSafetyCritical) ...[
+                                  const SizedBox(height: 6),
+                                  Flexible(
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 3,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.shade50,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        'CRITICAL',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.red.shade700,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+
+                            // const SizedBox(height: 4),
+                            Row(
+                              children: [
                                 Icon(
-                                  Icons.person_outline,
+                                  Icons.access_time_rounded,
                                   size: 14,
                                   color: Colors.grey.shade500,
                                 ),
                                 const SizedBox(width: 4),
-                                Flexible(
-                                  child: Text(
-                                    assignees,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                Text(
+                                  formattedTime,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade600,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
+                                if (assignees.isNotEmpty) ...[
+                                  const SizedBox(width: 12),
+                                  Icon(
+                                    Icons.person_outline,
+                                    size: 14,
+                                    color: Colors.grey.shade500,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      assignees,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
                               ],
-                            ],
-                          ),
-                          if (isSafetyCritical) ...[
-                            const SizedBox(height: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.red.shade50,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                'CRITICAL',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red.shade700,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
                             ),
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                    // Action button
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: onRemove,
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          child: Icon(
-                            Icons.check_circle,
-                            color: Colors.grey.shade400,
-                            size: 24,
+                      // Action button
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: onRemove,
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            child: Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                              size: 24,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -283,14 +235,14 @@ class MiniCalendar extends StatelessWidget {
   final VoidCallback onNextWeek;
 
   const MiniCalendar({
-    Key? key,
+    super.key,
     required this.selectedDay,
     required this.focusedDay,
     required this.primaryColor,
     required this.onDaySelected,
     required this.onPreviousWeek,
     required this.onNextWeek,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -505,7 +457,7 @@ class GroupedTaskList extends StatelessWidget {
               child: Text(
                 dateHeader,
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
@@ -518,7 +470,7 @@ class GroupedTaskList extends StatelessWidget {
                 onRemove: () => onTaskRemoved(task),
               );
             }).toList(),
-            const SizedBox(height: 16),
+            // const SizedBox(height: 16),
           ],
         );
       }).toList(),
@@ -537,7 +489,7 @@ class CalendarCard extends StatelessWidget {
   final VoidCallback onNextWeek;
 
   const CalendarCard({
-    Key? key,
+    super.key,
     required this.isExpanded,
     required this.selectedDay,
     required this.focusedDay,
@@ -546,7 +498,7 @@ class CalendarCard extends StatelessWidget {
     required this.onToggleExpanded,
     required this.onPreviousWeek,
     required this.onNextWeek,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -658,16 +610,14 @@ class AppBarConfig {
 class MainHomeContent extends StatefulWidget {
   final Color primaryColor;
   final List<Map<String, dynamic>> tasks;
-  final Function(Map<String, dynamic>) onTaskAdded;
   final Function(Map<String, dynamic>) onTaskRemoved;
 
   const MainHomeContent({
-    Key? key,
+    super.key,
     required this.primaryColor,
     required this.tasks,
-    required this.onTaskAdded,
     required this.onTaskRemoved,
-  }) : super(key: key);
+  });
 
   @override
   State<MainHomeContent> createState() => MainHomeContentState();
@@ -678,16 +628,7 @@ class MainHomeContentState extends State<MainHomeContent> {
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
 
-  final TextEditingController _voiceInputController = TextEditingController();
-  bool _isListening = false;
-
   List<Map<String, dynamic>> get _tasks => widget.tasks;
-
-  @override
-  void dispose() {
-    _voiceInputController.dispose();
-    super.dispose();
-  }
 
   void _goToPreviousWeek() {
     setState(() {
@@ -714,173 +655,41 @@ class MainHomeContentState extends State<MainHomeContent> {
     setState(() => _isCalendarExpanded = !_isCalendarExpanded);
   }
 
-  void _toggleListening() {
-    setState(() {
-      _isListening = !_isListening;
-    });
-    // TODO: Implement actual speech-to-text here
-  }
-
-  void _handleQuickTaskSubmit(String value) {
-    if (value.trim().isEmpty) return;
-
-    final newTask = {
-      'title': value.trim(),
-      'status': 'urgent',
-      'icon': Icons.checklist_rtl,
-      'dueDate': DateTime.now().add(const Duration(hours: 1)).toIso8601String(),
-      'done': false,
-      'assignees': ['Everyone'],
-      'taskType': 'standard',
-      'photoProofRequired': false,
-    };
-
-    widget.onTaskAdded(newTask);
-    _voiceInputController.clear();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Task "$value" added!'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
-  Widget _buildVoiceInputBar() {
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
+      width: double.infinity,
+      decoration: const BoxDecoration(
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, -2),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 16),
+          CalendarCard(
+            isExpanded: _isCalendarExpanded,
+            selectedDay: _selectedDay,
+            focusedDay: _focusedDay,
+            primaryColor: widget.primaryColor,
+            onDaySelected: _onDaySelected,
+            onToggleExpanded: _toggleCalendarExpanded,
+            onPreviousWeek: _goToPreviousWeek,
+            onNextWeek: _goToNextWeek,
+          ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: GroupedTaskList(
+                tasks: _tasks,
+                selectedDay: _selectedDay,
+                primaryColor: widget.primaryColor,
+                onTaskRemoved: widget.onTaskRemoved,
+              ),
+            ),
           ),
         ],
       ),
-      child: SafeArea(
-        top: false,
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                child: TextField(
-                  controller: _voiceInputController,
-                  decoration: InputDecoration(
-                    hintText: 'Add task with voice or type...',
-                    hintStyle: TextStyle(color: Colors.grey.shade500),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.auto_awesome,
-                      color: widget.primaryColor,
-                      size: 20,
-                    ),
-                  ),
-                  onSubmitted: _handleQuickTaskSubmit,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            GestureDetector(
-              onTap: _toggleListening,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: _isListening
-                        ? [Colors.red.shade400, Colors.red.shade600]
-                        : [
-                            widget.primaryColor,
-                            widget.primaryColor.withOpacity(0.8),
-                          ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: (_isListening ? Colors.red : widget.primaryColor)
-                          .withOpacity(0.4),
-                      spreadRadius: 2,
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  _isListening ? Icons.stop : Icons.mic,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: Container(
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-            ),
-            child: Column(
-              children: [
-                const SizedBox(height: 16),
-                CalendarCard(
-                  isExpanded: _isCalendarExpanded,
-                  selectedDay: _selectedDay,
-                  focusedDay: _focusedDay,
-                  primaryColor: widget.primaryColor,
-                  onDaySelected: _onDaySelected,
-                  onToggleExpanded: _toggleCalendarExpanded,
-                  onPreviousWeek: _goToPreviousWeek,
-                  onNextWeek: _goToNextWeek,
-                ),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: GroupedTaskList(
-                            tasks: _tasks,
-                            selectedDay: _selectedDay,
-                            primaryColor: widget.primaryColor,
-                            onTaskRemoved: widget.onTaskRemoved,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        _buildVoiceInputBar(),
-      ],
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reminder_app/AppColors/AppColors.dart';
+import 'package:reminder_app/widgets/custom_snackbar.dart';
 
 enum NotificationType { task, safetyAlert, generalReminder }
 
@@ -66,10 +67,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
     setState(() {
       _notifications.removeWhere((n) => n['id'] == notification['id']);
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Task '${notification['title']}' marked as Done."),
-      ),
+    CustomSnackbar.show(
+      title: 'Done',
+      message: "Task '${notification['title']}' marked as Done.",
+      icon: Icons.check_circle,
     );
   }
 
@@ -144,18 +145,19 @@ class _NotificationScreenState extends State<NotificationScreen> {
     setState(() {
       _notifications.removeWhere((n) => n['id'] == notification['id']);
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
+    CustomSnackbar.show(
+      title: 'Snoozed',
+      message:
           "'${notification['title']}' snoozed $label. Rereminder activated.",
-        ),
-      ),
+      icon: Icons.snooze,
     );
   }
 
   void _reschedule(Map<String, dynamic> notification) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Rescheduling '${notification['title']}'...")),
+    CustomSnackbar.show(
+      title: 'Reschedule',
+      message: "Rescheduling '${notification['title']}'...",
+      icon: Icons.schedule,
     );
   }
 

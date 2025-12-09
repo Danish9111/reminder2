@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:reminder_app/HomeScreens/HomeScreen.dart';
+import 'package:reminder_app/bottom_navigation_bar.dart';
 
 class FirstTaskTutorialScreen extends StatefulWidget {
   const FirstTaskTutorialScreen({Key? key}) : super(key: key);
 
   @override
-  State<FirstTaskTutorialScreen> createState() => _FirstTaskTutorialScreenState();
+  State<FirstTaskTutorialScreen> createState() =>
+      _FirstTaskTutorialScreenState();
 }
 
 class _FirstTaskTutorialScreenState extends State<FirstTaskTutorialScreen> {
@@ -17,25 +18,29 @@ class _FirstTaskTutorialScreenState extends State<FirstTaskTutorialScreen> {
       'icon': Icons.school,
       'color': Color(0xFF9B59B6),
       'title': 'Welcome to Your First Task!',
-      'description': 'Let\'s create a "School Drop-off" task together. This tutorial will guide you through the process.',
+      'description':
+          'Let\'s create a "School Drop-off" task together. This tutorial will guide you through the process.',
     },
     {
       'icon': Icons.edit_calendar,
       'color': Color(0xFF1ABC9C),
       'title': 'Set Task Details',
-      'description': 'Give your task a name, set the time, and add any important notes. You can also assign it to specific family members.',
+      'description':
+          'Give your task a name, set the time, and add any important notes. You can also assign it to specific family members.',
     },
     {
       'icon': Icons.notifications_active,
       'color': Color(0xFFF4D03F),
       'title': 'Get Reminders',
-      'description': 'Never miss important tasks! Set up reminders so everyone knows when it\'s time for school drop-off.',
+      'description':
+          'Never miss important tasks! Set up reminders so everyone knows when it\'s time for school drop-off.',
     },
     {
       'icon': Icons.check_circle,
       'color': Color(0xFF27AE60),
       'title': 'Mark as Complete',
-      'description': 'Once the task is done, simply check it off. Everyone in the family will see it\'s completed!',
+      'description':
+          'Once the task is done, simply check it off. Everyone in the family will see it\'s completed!',
     },
   ];
 
@@ -61,9 +66,13 @@ class _FirstTaskTutorialScreenState extends State<FirstTaskTutorialScreen> {
                       return Expanded(
                         child: Container(
                           height: 4,
-                          margin: EdgeInsets.only(right: index < _tutorialSteps.length - 1 ? 8 : 0),
+                          margin: EdgeInsets.only(
+                            right: index < _tutorialSteps.length - 1 ? 8 : 0,
+                          ),
                           decoration: BoxDecoration(
-                            color: index <= _currentStep ? Color(0xFF9B59B6) : Color(0xFFECF0F1),
+                            color: index <= _currentStep
+                                ? Color(0xFF9B59B6)
+                                : Color(0xFFECF0F1),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -73,7 +82,9 @@ class _FirstTaskTutorialScreenState extends State<FirstTaskTutorialScreen> {
                 ),
 
                 SizedBox(
-                  height: screenHeight * 0.55, // Give a fixed height for the PageView
+                  height:
+                      screenHeight *
+                      0.55, // Give a fixed height for the PageView
                   child: PageView.builder(
                     controller: _pageController,
                     onPageChanged: (index) {
@@ -147,14 +158,18 @@ class _FirstTaskTutorialScreenState extends State<FirstTaskTutorialScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xFF9B59B6),
                           foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
+                          padding: EdgeInsets.symmetric(
+                            vertical: screenHeight * 0.02,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 0,
                         ),
                         child: Text(
-                          _currentStep < _tutorialSteps.length - 1 ? 'Next' : 'Create My First Task',
+                          _currentStep < _tutorialSteps.length - 1
+                              ? 'Next'
+                              : 'Create My First Task',
                           style: TextStyle(
                             fontSize: screenHeight * 0.022,
                             fontWeight: FontWeight.w600,
@@ -193,7 +208,7 @@ class _FirstTaskTutorialScreenState extends State<FirstTaskTutorialScreen> {
   void _completeTutorial() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => HomeScreen()),
+      MaterialPageRoute(builder: (context) => const BottomNavigationScreen()),
     );
   }
 

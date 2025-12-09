@@ -52,30 +52,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildProfileHeader(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 24),
-                  _buildBadgesSection(),
-                  const SizedBox(height: 24),
-                  _buildStatsSection(),
-                  const SizedBox(height: 16),
-                  _buildSafetyPhraseCard(),
-                  const SizedBox(height: 24),
-                  _buildSettingsSection(),
-                  const SizedBox(height: 40),
+                  _buildProfileHeader(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 24),
+                        _buildBadgesSection(),
+                        const SizedBox(height: 24),
+                        _buildStatsSection(),
+                        const SizedBox(height: 24),
+                        _buildSettingsSection(),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+          // Sticky footer - Safety Phrase (minimal stripe)
+          Container(
+            color: Colors.grey.shade100,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: SafeArea(
+              top: false,
+              minimum: EdgeInsets.zero,
+              child: _buildSafetyPhraseCard(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -293,66 +307,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildSafetyPhraseCard() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
+    return Row(
+      children: [
+        Icon(Icons.shield_outlined, size: 16, color: Colors.grey.shade600),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            _isSafetyPhraseVisible ? safetyPhrase : 'Family Safety Phrase',
+            style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Family Safety Phrase',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                ),
-                if (_isSafetyPhraseVisible)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      safetyPhrase,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade700,
-                      ),
-                    ),
-                  ),
-              ],
+        ),
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _isSafetyPhraseVisible = !_isSafetyPhraseVisible;
+            });
+          },
+          child: Text(
+            _isSafetyPhraseVisible ? 'Hide' : 'Reveal',
+            style: TextStyle(
+              fontSize: 13,
+              color: AppColors.primaryColor,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _isSafetyPhraseVisible = !_isSafetyPhraseVisible;
-              });
-            },
-            style: TextButton.styleFrom(
-              backgroundColor: AppColors.primaryColor.withOpacity(0.1),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-            child: Text(
-              _isSafetyPhraseVisible ? 'Hide' : 'Reveal',
-              style: TextStyle(
-                color: AppColors.primaryColor,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

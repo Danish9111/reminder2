@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:reminder_app/widgets/custom_snackbar.dart';
 
 import '../AppColors/AppColors.dart';
 
@@ -93,8 +94,10 @@ class HelpAndSupportScreen extends StatelessWidget {
                 icon: Icons.question_answer_outlined,
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Loading General FAQs...")),
+                  CustomSnackbar.show(
+                    title: 'FAQs',
+                    message: 'Loading General FAQs...',
+                    icon: Icons.question_answer_outlined,
                   );
                 },
               ),
@@ -103,8 +106,10 @@ class HelpAndSupportScreen extends StatelessWidget {
                 icon: Icons.security,
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Loading Safety FAQs...")),
+                  CustomSnackbar.show(
+                    title: 'Safety FAQs',
+                    message: 'Loading Safety FAQs...',
+                    icon: Icons.security,
                   );
                 },
               ),
@@ -113,8 +118,10 @@ class HelpAndSupportScreen extends StatelessWidget {
                 icon: Icons.monetization_on_outlined,
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Loading Billing FAQs...")),
+                  CustomSnackbar.show(
+                    title: 'Billing FAQs',
+                    message: 'Loading Billing FAQs...',
+                    icon: Icons.monetization_on_outlined,
                   );
                 },
               ),
@@ -126,8 +133,10 @@ class HelpAndSupportScreen extends StatelessWidget {
                 icon: Icons.bug_report_outlined,
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Opening Bug Report form...")),
+                  CustomSnackbar.show(
+                    title: 'Bug Report',
+                    message: 'Opening Bug Report form...',
+                    icon: Icons.bug_report_outlined,
                   );
                 },
               ),
@@ -136,8 +145,10 @@ class HelpAndSupportScreen extends StatelessWidget {
                 icon: Icons.email_outlined,
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Composing new email...")),
+                  CustomSnackbar.show(
+                    title: 'Feedback',
+                    message: 'Composing new email...',
+                    icon: Icons.email_outlined,
                   );
                 },
               ),
@@ -152,10 +163,10 @@ class HelpAndSupportScreen extends StatelessWidget {
                 ),
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Calling Emergency Hotline... (Mock)"),
-                    ),
+                  CustomSnackbar.show(
+                    title: 'Emergency',
+                    message: 'Calling Emergency Hotline... (Mock)',
+                    icon: Icons.phone_forwarded,
                   );
                 },
               ),
@@ -167,10 +178,10 @@ class HelpAndSupportScreen extends StatelessWidget {
                 icon: Icons.playlist_play,
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Starting task creation tutorial..."),
-                    ),
+                  CustomSnackbar.show(
+                    title: 'Tutorial',
+                    message: 'Starting task creation tutorial...',
+                    icon: Icons.playlist_play,
                   );
                 },
               ),
@@ -179,10 +190,10 @@ class HelpAndSupportScreen extends StatelessWidget {
                 icon: Icons.trending_up,
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Showing Escalation Guide..."),
-                    ),
+                  CustomSnackbar.show(
+                    title: 'Guide',
+                    message: 'Showing Escalation Guide...',
+                    icon: Icons.trending_up,
                   );
                 },
               ),
@@ -191,10 +202,10 @@ class HelpAndSupportScreen extends StatelessWidget {
                 icon: Icons.people_alt_outlined,
                 screenWidth: screenWidth,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Showing Profile Linking Guide..."),
-                    ),
+                  CustomSnackbar.show(
+                    title: 'Guide',
+                    message: 'Showing Profile Linking Guide...',
+                    icon: Icons.people_alt_outlined,
                   );
                 },
               ),

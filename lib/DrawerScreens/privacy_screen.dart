@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:reminder_app/DrawerScreens/SubscriptionConfirm.dart'
     as AppColors;
+import 'package:reminder_app/widgets/custom_snackbar.dart';
 
 class PrivacyScreen extends StatefulWidget {
   const PrivacyScreen({Key? key}) : super(key: key);
@@ -55,12 +56,11 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
+              CustomSnackbar.show(
+                title: 'Data Deletion',
+                message:
                     'Data deletion requested. This may take a few moments.',
-                  ),
-                ),
+                icon: Icons.delete_forever,
               );
             },
             style: ElevatedButton.styleFrom(
@@ -102,8 +102,10 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Preparing your data export...')),
+              CustomSnackbar.show(
+                title: 'Export',
+                message: 'Preparing your data export...',
+                icon: Icons.download,
               );
             },
             style: ElevatedButton.styleFrom(
@@ -316,10 +318,10 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
                   title: 'Privacy Policy',
                   subtitle: 'Read our privacy policy',
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Opening privacy policy...'),
-                      ),
+                    CustomSnackbar.show(
+                      title: 'Privacy Policy',
+                      message: 'Opening privacy policy...',
+                      icon: Icons.policy,
                     );
                   },
                 ),
