@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:reminder_app/DrawerScreens/SubscriptionConfirm.dart'
     as AppColors;
+import 'package:reminder_app/providers/user_provider.dart';
 import 'package:reminder_app/widgets/custom_button.dart';
 import 'package:reminder_app/widgets/custom_snackbar.dart';
 import 'package:reminder_app/services/auth_service.dart';
-import 'package:reminder_app/services/firestore_service.dart';
+import 'package:reminder_app/services/family_service.dart';
 
 import 'FirstTaskTutorialScreen.dart';
 
@@ -18,9 +20,19 @@ class FamilySetupScreen extends StatefulWidget {
 
 class _FamilySetupScreenState extends State<FamilySetupScreen> {
   final TextEditingController _familyNameController = TextEditingController();
+  final TextEditingController _safetyPhraseController = TextEditingController();
   final List<Map<String, String>> _members = [];
   bool _isLoading = false;
   String? _inviteLink;
+
+  @override
+  void initState() {
+    super.initState();
+    // Load user data to show name
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserProvider>().loadUser();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +113,51 @@ class _FamilySetupScreenState extends State<FamilySetupScreen> {
                       ),
                     ),
 
+                    SizedBox(height: screenHeight * 0.025),
+
+                    // Safety Phrase Input
+                    TextField(
+                      controller: _safetyPhraseController,
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.022,
+                        color: Color(0xFF34495E),
+                      ),
+                      maxLines: 2,
+                      decoration: InputDecoration(
+                        labelText: 'Family Safety Phrase',
+                        labelStyle: TextStyle(
+                          color: Color(0xFF34495E).withOpacity(0.6),
+                        ),
+                        hintText: 'e.g., The purple bird flies at dawn',
+                        helperText: 'A secret phrase to verify family members',
+                        helperStyle: TextStyle(
+                          fontSize: screenHeight * 0.014,
+                          color: Color(0xFF34495E).withOpacity(0.5),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.shield_outlined,
+                          color: Color(0xFF9B59B6),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Color(0xFFECF0F1),
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Color(0xFF9B59B6),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+
                     SizedBox(height: screenHeight * 0.04),
 
                     // Members Section Header
@@ -154,13 +211,19 @@ class _FamilySetupScreenState extends State<FamilySetupScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'You',
-                                  style: TextStyle(
-                                    fontSize: screenHeight * 0.02,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF34495E),
-                                  ),
+                                Consumer<UserProvider>(
+                                  builder: (context, userProvider, _) {
+                                    final userName =
+                                        userProvider.user?.name ?? 'You';
+                                    return Text(
+                                      userName,
+                                      style: TextStyle(
+                                        fontSize: screenHeight * 0.02,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF34495E),
+                                      ),
+                                    );
+                                  },
                                 ),
                                 Text(
                                   'Leader • Admin',
@@ -454,10 +517,11 @@ class _FamilySetupScreenState extends State<FamilySetupScreen> {
       final user = authService.currentUser;
 
       if (user != null) {
-        final firestoreService = FirestoreService();
-        await firestoreService.createFamily(
+        final familyService = FamilyService();
+        await familyService.createFamily(
           user.uid,
           _familyNameController.text.trim(),
+          safetyPhrase: _safetyPhraseController.text.trim(),
         );
 
         if (mounted) {

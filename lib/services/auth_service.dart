@@ -29,6 +29,8 @@ class AuthService {
     onVerificationCompleted, // For auto-verification (Android)
   }) async {
     try {
+      debugPrint("Error initiating phone auth: ");
+
       await _auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
         verificationCompleted: onVerificationCompleted,
@@ -61,5 +63,24 @@ class AuthService {
       debugPrint("Error signing in with OTP: $e");
       rethrow;
     }
+  }
+
+  // Phone Auth: 3. Sign in with credential (for auto-verification)
+  Future<User?> signInWithCredential(PhoneAuthCredential credential) async {
+    try {
+      final UserCredential result = await _auth.signInWithCredential(
+        credential,
+      );
+      debugPrint("Signed in with credential: ${result.user?.uid}");
+      return result.user;
+    } catch (e) {
+      debugPrint("Error signing in with credential: $e");
+      rethrow;
+    }
+  }
+
+  Future<String?> getCurrentUserId() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    return uid;
   }
 }

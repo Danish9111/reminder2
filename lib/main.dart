@@ -1,11 +1,12 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:reminder_app/Authentication_Onboarding/Login+Otp/FamilySetupScreen.dart';
-import 'package:reminder_app/Authentication_Onboarding/Login+Otp/OtpVerificationScreen.dart';
-
 import 'package:reminder_app/auth_wrapper.dart';
-import 'package:reminder_app/bottom_navigation_bar.dart';
+import 'package:reminder_app/providers/family_provider.dart';
 import 'package:reminder_app/providers/task_provider.dart';
+import 'package:reminder_app/providers/auth_provider.dart';
+import 'package:reminder_app/providers/user_provider.dart';
+import 'package:reminder_app/services/push_notification_service.dart';
 import 'package:reminder_app/widgets/custom_snackbar.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -13,6 +14,10 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // await PushNotificationService.init();
   runApp(const MyApp());
 }
 
@@ -21,8 +26,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => TaskProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => TaskProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (context) => FamilyProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
       child: MaterialApp(
         navigatorKey: navigatorKey, // Required for Snackbar
         debugShowCheckedModeBanner: false,

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
-import 'package:reminder_app/services/auth_service.dart';
+import 'package:provider/provider.dart';
+import 'package:reminder_app/providers/auth_provider.dart';
 import 'package:reminder_app/Authentication_Onboarding/Login+Otp/OtpVerificationScreen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:reminder_app/widgets/custom_button.dart';
 import 'package:reminder_app/widgets/custom_snackbar.dart';
 
@@ -15,7 +14,6 @@ class PhoneLoginScreen extends StatefulWidget {
 
 class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   final TextEditingController _phoneController = TextEditingController();
-  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -108,10 +106,14 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                   SizedBox(height: screenHeight * 0.03),
 
                   // Send OTP Button
-                  CustomButton(
-                    onPressed: _sendOTP,
-                    text: 'Send OTP',
-                    isLoading: _isLoading,
+                  Consumer<AuthProvider>(
+                    builder: (context, authProvider, child) {
+                      return CustomButton(
+                        onPressed: authProvider.isLoading ? null : _sendOTP,
+                        text: 'Send OTP',
+                        isLoading: authProvider.isLoading,
+                      );
+                    },
                   ),
 
                   Spacer(),
@@ -145,54 +147,25 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
-
     String inputNumber = _phoneController.text.trim();
-    // Allow user to enter +92... or just 92...
     final phoneNumber = inputNumber.startsWith('+')
         ? inputNumber
         : "+$inputNumber";
-    final authService = AuthService();
 
-    try {
-      await authService.verifyPhoneNumber(
-        phoneNumber: phoneNumber,
-        onCodeSent: (String verificationId, int? resendToken) {
-          if (mounted) {
-            setState(() => _isLoading = false);
-            // Navigate to OTP Screen with the verificationId
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => OTPVerificationScreen(
-                  phoneNumber: phoneNumber,
-                  verificationId: verificationId, // NEW: Pass this ID
-                ),
-              ),
-            );
-          }
-        },
-        onVerificationFailed: (FirebaseAuthException e) {
-          if (mounted) {
-            setState(() => _isLoading = false);
-            CustomSnackbar.show(
-              title: 'Error',
-              message: 'Failed to send code: $e',
-            );
-          }
-        },
-        onCodeAutoRetrievalTimeout: (String verificationId) {
-          // Auto-resolution timed out...
-        },
-        onVerificationCompleted: (PhoneAuthCredential credential) {
-          // Android automatic verification...
-          // We can handle this by automatically signing in if we want
-        },
-      );
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        CustomSnackbar.show(title: 'Error', message: 'Failed to send code: $e');
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final success = await authProvider.sendOTP(phoneNumber);
+
+    if (mounted) {
+      if (success) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                OTPVerificationScreen(phoneNumber: phoneNumber),
+          ),
+        );
+      } else if (authProvider.error != null) {
+        CustomSnackbar.show(title: 'Error', message: authProvider.error!);
       }
     }
   }

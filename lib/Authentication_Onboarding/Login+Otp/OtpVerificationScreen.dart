@@ -1,22 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:reminder_app/widgets/custom_button.dart';
 import 'package:reminder_app/widgets/custom_snackbar.dart';
-
-import 'package:reminder_app/services/auth_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:reminder_app/auth_wrapper.dart';
+import 'package:reminder_app/providers/auth_provider.dart';
 import 'package:reminder_app/auth_wrapper.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
   final String phoneNumber;
-  final String? verificationId;
 
-  const OTPVerificationScreen({
-    super.key,
-    this.phoneNumber = '+923120708550',
-    this.verificationId,
-  });
+  const OTPVerificationScreen({super.key, this.phoneNumber = '+923120708550'});
 
   @override
   State<OTPVerificationScreen> createState() => _OTPVerificationScreenState();
@@ -28,7 +21,50 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     (index) => TextEditingController(),
   );
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
-  bool _isLoading = false;
+
+  Future<void> _verifyOTP() async {
+    String otp = _otpControllers.map((c) => c.text).join();
+
+    if (otp.length != 6) {
+      CustomSnackbar.show(
+        title: "Opps",
+        message: 'Please enter the complete 6-digit code',
+      );
+      return;
+    }
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final success = await authProvider.verifyOTP(otp);
+
+    if (mounted) {
+      if (success) {
+        // Success! Clear stack and let AuthWrapper decide where to go
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const AuthWrapper()),
+          (route) => false,
+        );
+      } else if (authProvider.error != null) {
+        CustomSnackbar.show(title: "Error", message: authProvider.error!);
+      }
+    }
+  }
+
+  void _resendOTP() {
+    // TODO: Implement resend via AuthProvider
+    CustomSnackbar.show(title: "Success", message: 'OTP sent successfully!');
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _otpControllers) {
+      controller.dispose();
+    }
+    for (var node in _focusNodes) {
+      node.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -157,10 +193,16 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                       ),
 
                       SizedBox(height: 32),
-                      CustomButton(
-                        onPressed: _isLoading ? null : _verifyOTP,
-                        text: 'Verify',
-                        isLoading: _isLoading,
+                      Consumer<AuthProvider>(
+                        builder: (context, authProvider, child) {
+                          return CustomButton(
+                            onPressed: authProvider.isLoading
+                                ? null
+                                : _verifyOTP,
+                            text: 'Verify',
+                            isLoading: authProvider.isLoading,
+                          );
+                        },
                       ),
 
                       SizedBox(height: 24),
@@ -201,66 +243,5 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _verifyOTP() async {
-    String otp = _otpControllers.map((c) => c.text).join();
-
-    if (otp.length != 6) {
-      CustomSnackbar.show(
-        title: "Opps",
-        message: 'Please enter the complete 6-digit code',
-      );
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    try {
-      final authService = AuthService();
-      User? user;
-
-      if (widget.verificationId != null) {
-        // Real SMS Verification
-        user = await authService.signInWithOTP(
-          verificationId: widget.verificationId!,
-          smsCode: otp,
-        );
-      } else {
-        // Fallback or Test Mode (If we ever use it without SMS)
-        // For now, if no verificationId, we can't verify properly.
-        user = authService.currentUser; // Check if already anonymous?
-      }
-
-      if (mounted) {
-        setState(() => _isLoading = false);
-        if (user != null) {
-          // Success! Clear stack and let AuthWrapper decide where to go
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const AuthWrapper()),
-            (route) => false, // Remove all previous routes
-          );
-        } else {
-          CustomSnackbar.show(title: "Error", message: "Invalid Code");
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        CustomSnackbar.show(title: "Error", message: e.toString());
-      }
-    }
-  }
-
-  void _resendOTP() {
-    CustomSnackbar.show(title: "Success", message: 'OTP sent successfully!');
-  }
-
-  @override
-  void dispose() {
-    for (var controller in _otpControllers) controller.dispose();
-    for (var node in _focusNodes) node.dispose();
-    super.dispose();
   }
 }

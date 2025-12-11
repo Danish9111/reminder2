@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:reminder_app/models/task_model.dart';
 import 'package:reminder_app/providers/task_provider.dart';
+import 'package:reminder_app/widgets/custom_snackbar.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 
@@ -14,6 +16,15 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final Color primaryColor = const Color(0xFF9B59B6);
 
+  void _handleTaskCompleted(TaskModel task) {
+    context.read<TaskProvider>().toggleTaskDone(task);
+    CustomSnackbar.show(
+      title: task.done ? 'Task Reopened' : 'Task Completed! 🎉',
+      message: task.title,
+      icon: task.done ? Icons.replay : Icons.check_circle,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tasks = context.watch<TaskProvider>().tasks;
@@ -21,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return MainHomeContent(
       primaryColor: primaryColor,
       tasks: tasks,
-      onTaskRemoved: (task) => context.read<TaskProvider>().removeTask(task),
+      onTaskRemoved: _handleTaskCompleted,
     );
   }
 }
@@ -35,7 +46,7 @@ class DateUtils {
 }
 
 class TaskCard extends StatelessWidget {
-  final Map<String, dynamic> task;
+  final TaskModel task;
   final Color primaryColor;
   final VoidCallback onRemove;
 
@@ -48,17 +59,17 @@ class TaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dueDate = DateTime.parse(task['dueDate']);
+    final dueDate = task.dueDate;
     final formattedTime = DateFormat('hh:mm a').format(dueDate);
-    final isSafetyCritical = task['taskType'] == 'safetyCritical';
+    final isSafetyCritical = task.taskType == 'safetyCritical';
     final taskColor = isSafetyCritical ? Colors.red.shade600 : primaryColor;
     final taskIcon = isSafetyCritical
         ? Icons.shield_outlined
         : Icons.check_circle_outline;
 
     // Extract just the task name (remove date/time from title if present)
-    final taskTitle = task['title'].toString().split(' - ')[0];
-    final assignees = (task['assignees'] as List?)?.join(', ') ?? '';
+    final taskTitle = task.title.split(' - ')[0];
+    final assignees = task.assignees.join(', ');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -207,8 +218,10 @@ class TaskCard extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             child: Icon(
-                              Icons.check_circle,
-                              color: Colors.green,
+                              task.done
+                                  ? Icons.check_circle
+                                  : Icons.check_circle_outline,
+                              color: task.done ? Colors.grey : Colors.green,
                               size: 24,
                             ),
                           ),
@@ -321,10 +334,10 @@ class MiniCalendar extends StatelessWidget {
 }
 
 class GroupedTaskList extends StatelessWidget {
-  final List<Map<String, dynamic>> tasks;
+  final List<TaskModel> tasks;
   final DateTime selectedDay;
   final Color primaryColor;
-  final Function(Map<String, dynamic>) onTaskRemoved;
+  final Function(TaskModel) onTaskRemoved;
 
   const GroupedTaskList({
     super.key,
@@ -334,8 +347,8 @@ class GroupedTaskList extends StatelessWidget {
     required this.onTaskRemoved,
   });
 
-  Map<String, List<Map<String, dynamic>>> _getTasksByDate() {
-    final Map<String, List<Map<String, dynamic>>> groupedTasks = {};
+  Map<String, List<TaskModel>> _getTasksByDate() {
+    final Map<String, List<TaskModel>> groupedTasks = {};
     final normalizedNow = DateUtils.normalize(DateTime.now());
     final normalizedTomorrow = DateUtils.normalize(
       DateTime.now().add(const Duration(days: 1)),
@@ -347,7 +360,7 @@ class GroupedTaskList extends StatelessWidget {
     );
 
     for (var task in tasks) {
-      final dueDate = DateTime.parse(task['dueDate']);
+      final dueDate = task.dueDate;
       final normalizedDueDate = DateUtils.normalize(dueDate);
       bool shouldInclude = false;
 
@@ -372,13 +385,9 @@ class GroupedTaskList extends StatelessWidget {
     }
 
     final sortedKeys = groupedTasks.keys.toList()..sort();
-    final sortedGroupedTasks = <String, List<Map<String, dynamic>>>{};
+    final sortedGroupedTasks = <String, List<TaskModel>>{};
     for (var key in sortedKeys) {
-      groupedTasks[key]!.sort(
-        (a, b) => DateTime.parse(
-          a['dueDate'],
-        ).compareTo(DateTime.parse(b['dueDate'])),
-      );
+      groupedTasks[key]!.sort((a, b) => a.dueDate.compareTo(b.dueDate));
       sortedGroupedTasks[key] = groupedTasks[key]!;
     }
     return sortedGroupedTasks;
@@ -609,8 +618,8 @@ class AppBarConfig {
 
 class MainHomeContent extends StatefulWidget {
   final Color primaryColor;
-  final List<Map<String, dynamic>> tasks;
-  final Function(Map<String, dynamic>) onTaskRemoved;
+  final List<TaskModel> tasks;
+  final Function(TaskModel) onTaskRemoved;
 
   const MainHomeContent({
     super.key,
@@ -628,7 +637,7 @@ class MainHomeContentState extends State<MainHomeContent> {
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
 
-  List<Map<String, dynamic>> get _tasks => widget.tasks;
+  List<TaskModel> get _tasks => widget.tasks;
 
   void _goToPreviousWeek() {
     setState(() {

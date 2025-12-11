@@ -5,7 +5,7 @@ import 'package:reminder_app/bottom_navigation_bar.dart';
 import 'package:reminder_app/Authentication_Onboarding/Login+Otp/ProfileSetupScreen.dart';
 import 'package:reminder_app/Authentication_Onboarding/Login+Otp/login.dart';
 import 'package:reminder_app/services/auth_service.dart';
-import 'package:reminder_app/services/firestore_service.dart';
+import 'package:reminder_app/services/user_service.dart';
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
@@ -24,7 +24,7 @@ class AuthWrapper extends StatelessWidget {
         if (snapshot.hasData) {
           final user = snapshot.data!;
           return FutureBuilder<Map<String, bool>>(
-            future: FirestoreService().getUserStatus(user.uid),
+            future: UserService().getUserStatus(user.uid),
             builder: (context, userSnapshot) {
               if (userSnapshot.connectionState == ConnectionState.waiting) {
                 return const Scaffold(

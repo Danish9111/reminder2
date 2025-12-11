@@ -5,8 +5,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:reminder_app/AppColors/AppColors.dart';
+import 'package:reminder_app/models/task_model.dart';
+import 'package:reminder_app/providers/family_provider.dart';
 import 'package:reminder_app/providers/task_provider.dart';
-import 'package:reminder_app/services/ai_reminder_service.dart';
+import 'package:reminder_app/utils/auth_utils.dart';
 import 'package:reminder_app/widgets/custom_button.dart';
 import 'package:reminder_app/widgets/custom_snackbar.dart';
 
@@ -25,7 +27,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
   final TextEditingController _taskController = TextEditingController();
   final TextEditingController _voiceInputController = TextEditingController();
-  final AIReminderService _aiService = AIReminderService();
   final ImagePicker _imagePicker = ImagePicker();
 
   bool _isListening = false;
@@ -35,11 +36,18 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
   TaskType _selectedTaskType = TaskType.standard;
-  final Map<String, bool> _assignees = {
-    'Hazrat': false,
-    'Azy': false,
-    'Everyone': false,
-  };
+  // Dynamic assignees from Firebase - stores selected member display names
+  final Set<String> _selectedAssignees = {};
+  bool _everyoneSelected = false;
+  bool _isAddingTask = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<FamilyProvider>().loadFamilyMembers();
+    });
+  }
 
   @override
   void dispose() {
@@ -109,116 +117,116 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     });
   }
 
-  void _toggleListening() {
-    setState(() {
-      _isListening = !_isListening;
-    });
-    // TODO: Implement actual speech-to-text here
-    if (_isListening) {
-      // Simulate voice input after 2 seconds
-      Future.delayed(const Duration(seconds: 2), () {
-        if (_isListening && mounted) {
-          setState(() {
-            _voiceInputController.text = "Pick up groceries";
-            _isListening = false;
-          });
-          _handleVoiceInputSubmit(_voiceInputController.text);
-        }
-      });
-    }
-  }
+  // void _toggleListening() {
+  //   setState(() {
+  //     _isListening = !_isListening;
+  //   });
+  //   // TODO: Implement actual speech-to-text here
+  //   if (_isListening) {
+  //     // Simulate voice input after 2 seconds
+  //     Future.delayed(const Duration(seconds: 2), () {
+  //       if (_isListening && mounted) {
+  //         setState(() {
+  //           _voiceInputController.text = "Pick up groceries";
+  //           _isListening = false;
+  //         });
+  //         _handleVoiceInputSubmit(_voiceInputController.text);
+  //       }
+  //     });
+  //   }
+  // }
 
-  Future<void> _handleVoiceInputSubmit(String value) async {
-    print('🔵 _handleVoiceInputSubmit called with: "$value"');
+  // Future<void> _handleVoiceInputSubmit(String value) async {
+  //   print('🔵 _handleVoiceInputSubmit called with: "$value"');
 
-    if (value.trim().isEmpty) {
-      print('🔴 Empty input, returning');
-      return;
-    }
+  //   if (value.trim().isEmpty) {
+  //     print('🔴 Empty input, returning');
+  //     return;
+  //   }
 
-    setState(() => _isAIParsing = true);
-    print('🔵 Starting AI parsing...');
+  //   setState(() => _isAIParsing = true);
+  //   print('🔵 Starting AI parsing...');
 
-    try {
-      final result = await _aiService.parseReminder(value.trim());
-      print('🔵 AI parse result: $result');
+  //   try {
+  //     final result = await _aiService.parseReminder(value.trim());
+  //     print('🔵 AI parse result: $result');
 
-      if (result != null && mounted) {
-        // Set title
-        _taskController.text = result.title;
+  //     if (result != null && mounted) {
+  //       // Set title
+  //       _taskController.text = result.title;
 
-        // Set time if parsed
-        if (result.time != null) {
-          _selectedDate = result.time!;
-          _selectedTime = TimeOfDay.fromDateTime(result.time!);
-        }
+  //       // Set time if parsed
+  //       if (result.time != null) {
+  //         _selectedDate = result.time!;
+  //         _selectedTime = TimeOfDay.fromDateTime(result.time!);
+  //       }
 
-        // Set assignee if parsed (case-insensitive matching)
-        if (result.assignee != null) {
-          final assigneeLower = result.assignee!.toLowerCase();
+  //       // Set assignee if parsed (case-insensitive matching)
+  //       if (result.assignee != null) {
+  //         final assigneeLower = result.assignee!.toLowerCase();
 
-          // Find matching assignee (case-insensitive)
-          String? matchedAssignee;
-          for (final key in _assignees.keys) {
-            if (key.toLowerCase() == assigneeLower) {
-              matchedAssignee = key;
-              break;
-            }
-          }
+  //         // Find matching assignee (case-insensitive)
+  //         String? matchedAssignee;
+  //         for (final key in _assignees.keys) {
+  //           if (key.toLowerCase() == assigneeLower) {
+  //             matchedAssignee = key;
+  //             break;
+  //           }
+  //         }
 
-          if (matchedAssignee != null) {
-            _assignees.updateAll((key, value) => false);
-            _assignees[matchedAssignee] = true;
-          } else if (assigneeLower == 'everyone' || assigneeLower == 'all') {
-            _assignees.updateAll((key, value) => true);
-          } else {
-            // If no match found, assign to Everyone by default
-            _assignees.updateAll((key, value) => true);
-          }
-        } else {
-          // No assignee specified, assign to Everyone by default
-          _assignees.updateAll((key, value) => true);
-        }
+  //         if (matchedAssignee != null) {
+  //           _assignees.updateAll((key, value) => false);
+  //           _assignees[matchedAssignee] = true;
+  //         } else if (assigneeLower == 'everyone' || assigneeLower == 'all') {
+  //           _assignees.updateAll((key, value) => true);
+  //         } else {
+  //           // If no match found, assign to Everyone by default
+  //           _assignees.updateAll((key, value) => true);
+  //         }
+  //       } else {
+  //         // No assignee specified, assign to Everyone by default
+  //         _assignees.updateAll((key, value) => true);
+  //       }
 
-        setState(() {});
-        _voiceInputController.clear();
+  //       setState(() {});
+  //       _voiceInputController.clear();
 
-        CustomSnackbar.show(
-          title: 'AI Parsed',
-          message: result.title,
-          icon: Icons.auto_awesome,
-        );
+  //       CustomSnackbar.show(
+  //         title: 'AI Parsed',
+  //         message: result.title,
+  //         icon: Icons.auto_awesome,
+  //       );
 
-        // Directly add the task after successful AI parsing
-        await Future.delayed(const Duration(milliseconds: 300));
-        if (mounted) {
-          _addTask();
-        }
-      } else {
-        // Fallback: just use the text as title
-        setState(() {
-          _taskController.text = value.trim();
-        });
-        _voiceInputController.clear();
+  //       // Directly add the task after successful AI parsing
+  //       await Future.delayed(const Duration(milliseconds: 300));
+  //       if (mounted) {
+  //         _addTask();
+  //       }
+  //     } else {
+  //       // Fallback: just use the text as title
+  //       setState(() {
+  //         _taskController.text = value.trim();
+  //       });
+  //       _voiceInputController.clear();
 
-        CustomSnackbar.show(
-          title: 'Fallback',
-          message: 'Could not parse with AI, using raw text',
-          icon: Icons.text_fields,
-        );
-      }
-    } catch (e) {
-      print('AI parsing error: $e');
-      setState(() {
-        _taskController.text = value.trim();
-      });
-      _voiceInputController.clear();
-    } finally {
-      if (mounted) {
-        setState(() => _isAIParsing = false);
-      }
-    }
-  }
+  //       CustomSnackbar.show(
+  //         title: 'Fallback',
+  //         message: 'Could not parse with AI, using raw text',
+  //         icon: Icons.text_fields,
+  //       );
+  //     }
+  //   } catch (e) {
+  //     print('AI parsing error: $e');
+  //     setState(() {
+  //       _taskController.text = value.trim();
+  //     });
+  //     _voiceInputController.clear();
+  //   } finally {
+  //     if (mounted) {
+  //       setState(() => _isAIParsing = false);
+  //     }
+  //   }
+  // }
 
   Future<void> scheduleNativeAlarm(
     DateTime dateTime,
@@ -251,16 +259,30 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     });
   }
 
-  void _handleAssigneeToggle(String assignee) {
+  void _handleAssigneeToggle(String memberName, List<String> allMemberNames) {
     setState(() {
-      if (assignee == 'Everyone') {
-        bool isEveryone = _assignees['Everyone']!;
-        _assignees['Hazrat'] = !isEveryone;
-        _assignees['Azy'] = !isEveryone;
-        _assignees['Everyone'] = !isEveryone;
+      if (memberName == 'Everyone') {
+        if (_everyoneSelected) {
+          // Deselect everyone
+          _everyoneSelected = false;
+          _selectedAssignees.clear();
+        } else {
+          // Select everyone
+          _everyoneSelected = true;
+          _selectedAssignees.clear();
+          _selectedAssignees.addAll(allMemberNames);
+        }
       } else {
-        _assignees[assignee] = !_assignees[assignee]!;
-        _assignees['Everyone'] = false;
+        _everyoneSelected = false;
+        if (_selectedAssignees.contains(memberName)) {
+          _selectedAssignees.remove(memberName);
+        } else {
+          _selectedAssignees.add(memberName);
+        }
+        // Check if all members are now selected
+        if (_selectedAssignees.length == allMemberNames.length) {
+          _everyoneSelected = true;
+        }
       }
     });
   }
@@ -308,10 +330,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       return;
     }
 
-    final assigneesList = _assignees.entries
-        .where((e) => e.value)
-        .map((e) => e.key)
-        .toList();
+    final assigneesList = _selectedAssignees.toList();
 
     if (assigneesList.isEmpty) {
       CustomSnackbar.show(
@@ -321,6 +340,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       );
       return;
     }
+
+    setState(() => _isAddingTask = true);
 
     final String reminderType = _selectedTaskType == TaskType.safetyCritical
         ? 'critical'
@@ -334,40 +355,51 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       _selectedTime.minute,
     );
 
-    final formattedDate = DateFormat(
-      'MMM dd, yyyy - hh:mm a',
-    ).format(fullDateTime);
+    // Get familyId from provider
+    final familyProvider = context.read<FamilyProvider>();
+    final familyId = familyProvider.family?.id ?? '';
+    final uid = currentUid ?? '';
 
-    final newTask = {
-      'title': "${_taskController.text.trim()} - $formattedDate",
-      'status': reminderType,
-      'icon': _selectedTaskType == TaskType.safetyCritical
-          ? Icons.shield_outlined
-          : Icons.checklist_rtl,
-      'dueDate': fullDateTime.toIso8601String(),
-      'done': false,
-      'assignees': assigneesList,
-      'taskType': _selectedTaskType.name,
-      'photoProofRequired': _isPhotoProofRequired,
-    };
-
-    await scheduleNativeAlarm(
-      fullDateTime,
-      _taskController.text.trim(),
-      assigneesList,
+    // Create TaskModel
+    final newTask = TaskModel(
+      title: _taskController.text.trim(),
+      status: reminderType,
+      dueDate: fullDateTime,
+      done: false,
+      assignees: assigneesList,
+      taskType: _selectedTaskType.name,
+      photoProofRequired: _isPhotoProofRequired,
+      createdBy: uid,
+      familyId: familyId,
     );
 
-    CustomSnackbar.show(
-      title: 'Task Added',
-      message: 'Assigned to: ${assigneesList.join(", ")}',
-      icon: Icons.check_circle_outline,
-    );
-    _taskController.clear();
+    // Save to Firebase via provider
+    final success = await context.read<TaskProvider>().addTask(newTask);
 
-    // if (widget.onTaskAdded != null) {
-    //   widget.onTaskAdded!(newTask);
-    // }
-    context.read<TaskProvider>().addTask(newTask);
+    if (success) {
+      await scheduleNativeAlarm(
+        fullDateTime,
+        _taskController.text.trim(),
+        assigneesList,
+      );
+
+      CustomSnackbar.show(
+        title: 'Task Added',
+        message: 'Assigned to: ${assigneesList.join(", ")}',
+        icon: Icons.check_circle_outline,
+      );
+      _taskController.clear();
+      _selectedAssignees.clear();
+      _everyoneSelected = false;
+    } else {
+      CustomSnackbar.show(
+        title: 'Error',
+        message: 'Failed to save task. Please try again.',
+        icon: Icons.error_outline,
+      );
+    }
+
+    setState(() => _isAddingTask = false);
   }
 
   @override
@@ -583,10 +615,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   _buildBottomAIBar(),
                   const SizedBox(height: 12),
                   CustomButton.primary(
-                    text: "Add Task",
-                    onPressed: _addTask,
-                    icon: Icons.add_task,
+                    text: _isAddingTask ? "Adding..." : "Add Task",
+                    onPressed: _isAddingTask ? null : _addTask,
+                    icon: _isAddingTask ? null : Icons.add_task,
                     isFullWidth: true,
+                    isLoading: _isAddingTask,
                   ),
                 ],
               ),
@@ -631,7 +664,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 14),
               ),
-              onSubmitted: _handleVoiceInputSubmit,
+              onSubmitted: (value) {},
             ),
           ),
 
@@ -746,6 +779,13 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   }
 
   Widget _buildAssignees() {
+    final familyProvider = context.watch<FamilyProvider>();
+    final members = familyProvider.members;
+    final isLoading = familyProvider.isMembersLoading;
+
+    // Get all member names for the 'Everyone' toggle
+    final allMemberNames = members.map((m) => m.displayName).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -758,52 +798,88 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _assignees.keys.map((name) {
-            final isSelected = _assignees[name]!;
-            return GestureDetector(
-              onTap: () => _handleAssigneeToggle(name),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.primaryColor
-                      : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isSelected
-                        ? AppColors.primaryColor
-                        : Colors.grey.shade300,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (isSelected) ...[
-                      const Icon(Icons.check, size: 14, color: Colors.white),
-                      const SizedBox(width: 4),
-                    ],
-                    Text(
-                      name,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: isSelected ? Colors.white : Colors.grey.shade700,
-                      ),
-                    ),
-                  ],
-                ),
+        if (isLoading)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
               ),
-            );
-          }).toList(),
-        ),
+            ),
+          )
+        else if (members.isEmpty)
+          Text(
+            'No family members found',
+            style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+          )
+        else
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              // Everyone option
+              _buildAssigneeChip(
+                'Everyone',
+                _everyoneSelected,
+                () => _handleAssigneeToggle('Everyone', allMemberNames),
+              ),
+              // Individual members
+              ...members.map((member) {
+                final isSelected = _selectedAssignees.contains(
+                  member.displayName,
+                );
+                return _buildAssigneeChip(
+                  member.displayName,
+                  isSelected,
+                  () =>
+                      _handleAssigneeToggle(member.displayName, allMemberNames),
+                  subtitle: member.role,
+                );
+              }),
+            ],
+          ),
       ],
+    );
+  }
+
+  Widget _buildAssigneeChip(
+    String name,
+    bool isSelected,
+    VoidCallback onTap, {
+    String? subtitle,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primaryColor : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.primaryColor : Colors.grey.shade300,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isSelected) ...[
+              const Icon(Icons.check, size: 14, color: Colors.white),
+              const SizedBox(width: 4),
+            ],
+            Text(
+              name,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: isSelected ? Colors.white : Colors.grey.shade700,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

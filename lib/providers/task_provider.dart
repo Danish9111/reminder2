@@ -1,47 +1,114 @@
 import 'package:flutter/material.dart';
+import 'package:reminder_app/models/task_model.dart';
+import 'package:reminder_app/services/task_service.dart';
 
 class TaskProvider extends ChangeNotifier {
-  final List<Map<String, dynamic>> _tasks = [
-    // Sample tasks for testing
-    {
-      'title': 'Empty the dishwasher',
-      'status': 'urgent',
-      'icon': Icons.checklist_rtl,
-      'dueDate': DateTime.now().add(const Duration(hours: 2)).toIso8601String(),
-      'done': false,
-      'assignees': ['Hazrat'],
-      'taskType': 'standard',
-      'photoProofRequired': false,
-    },
-    {
-      'title': 'Check smoke detectors',
-      'status': 'critical',
-      'icon': Icons.shield_outlined,
-      'dueDate': DateTime.now().add(const Duration(hours: 5)).toIso8601String(),
-      'done': false,
-      'assignees': ['Everyone'],
-      'taskType': 'safetyCritical',
-      'photoProofRequired': true,
-    },
-  ];
+  final TaskService _taskService = TaskService();
 
-  List<Map<String, dynamic>> get tasks => List.unmodifiable(_tasks);
+  List<TaskModel> _tasks = [];
+  bool _isLoading = false;
+  String? _error;
 
-  void addTask(Map<String, dynamic> task) {
-    _tasks.add(task);
-    notifyListeners();
+  List<TaskModel> get tasks => List.unmodifiable(_tasks);
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+
+  /// Add a new task to Firebase
+  Future<bool> addTask(TaskModel task) async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      final taskId = await _taskService.addTask(task);
+
+      // Add to local list with the new ID
+      _tasks.add(task.copyWith(id: taskId));
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 
-  void removeTask(Map<String, dynamic> task) {
-    _tasks.remove(task);
-    notifyListeners();
-  }
+  /// Load tasks for a specific family
+  Future<void> loadTasksByFamily(String familyId) async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
 
-  void toggleTaskDone(Map<String, dynamic> task) {
-    final index = _tasks.indexOf(task);
-    if (index != -1) {
-      _tasks[index]['done'] = !_tasks[index]['done'];
+      _tasks = await _taskService.fetchTasksByFamily(familyId);
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
       notifyListeners();
     }
+  }
+
+  /// Load tasks assigned to current user
+  Future<void> loadTasksByAssignee(String userName) async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      _tasks = await _taskService.fetchTasksByAssignee(userName);
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Toggle task completion status
+  Future<void> toggleTaskDone(TaskModel task) async {
+    if (task.id == null) return;
+
+    try {
+      final newDoneStatus = !task.done;
+      await _taskService.toggleTaskDone(task.id!, newDoneStatus);
+
+      // Update local list
+      final index = _tasks.indexWhere((t) => t.id == task.id);
+      if (index != -1) {
+        _tasks[index] = _tasks[index].copyWith(done: newDoneStatus);
+        notifyListeners();
+      }
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  /// Delete a task
+  Future<void> deleteTask(TaskModel task) async {
+    if (task.id == null) return;
+
+    try {
+      await _taskService.deleteTask(task.id!);
+      _tasks.removeWhere((t) => t.id == task.id);
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  /// Clear all tasks (for logout, etc.)
+  void clearTasks() {
+    _tasks = [];
+    notifyListeners();
   }
 }
