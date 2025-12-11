@@ -71,10 +71,25 @@ class _QuietHoursScreenState extends State<QuietHoursScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Quiet Hours'),
-        backgroundColor: AppColors.primaryColor,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_rounded,
+            color: Colors.grey.shade800,
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Quiet Hours',
+          style: TextStyle(
+            color: Colors.grey.shade800,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Padding(

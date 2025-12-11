@@ -89,27 +89,47 @@ class _NotificationScreenState extends State<NotificationScreen> {
   void _showStandardSnoozeDialog(Map<String, dynamic> notification) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        final screenWidth = MediaQuery.of(context).size.width;
-        return Padding(
-          padding: EdgeInsets.all(screenWidth * 0.06),
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Snooze '${notification['title']}'",
-                style: TextStyle(
-                  fontSize: screenWidth * 0.05,
-                  fontWeight: FontWeight.bold,
+              // Handle bar
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-              SizedBox(height: screenWidth * 0.04),
-              _snoozeButton(notification, 1, "1 Hour", screenWidth),
-              _snoozeButton(notification, 3, "3 Hours", screenWidth),
+              Text(
+                "Snooze",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                notification['title'],
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+              ),
+              const SizedBox(height: 20),
+              _snoozeOption(notification, 1, "1 Hour", Icons.schedule),
+              const SizedBox(height: 12),
+              _snoozeOption(notification, 3, "3 Hours", Icons.snooze),
             ],
           ),
         );
@@ -117,23 +137,45 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
-  Widget _snoozeButton(
+  Widget _snoozeOption(
     Map<String, dynamic> notification,
     int hours,
     String label,
-    double screenWidth,
+    IconData icon,
   ) {
-    return ListTile(
-      leading: Icon(
-        Icons.snooze,
-        color: AppColors.primaryColor,
-        size: screenWidth * 0.07,
-      ),
-      title: Text(label, style: TextStyle(fontSize: screenWidth * 0.045)),
+    return InkWell(
       onTap: () {
         Navigator.pop(context);
         _snoozeTask(notification, Duration(hours: hours), label);
       },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: AppColors.primaryColor, size: 20),
+            ),
+            const SizedBox(width: 14),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+            const Spacer(),
+            Icon(Icons.chevron_right, color: Colors.grey.shade400),
+          ],
+        ),
+      ),
     );
   }
 
@@ -163,26 +205,41 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   Widget _buildFilterChip(String label, NotificationType? type) {
     final isSelected = _selectedFilter == type;
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: FilterChip(
-        label: Text(label),
-        selected: isSelected,
-        backgroundColor: Colors.grey.shade100,
-        selectedColor: AppColors.primaryColor.withOpacity(0.1),
-        checkmarkColor: AppColors.primaryColor,
-        labelStyle: TextStyle(
-          color: isSelected ? AppColors.primaryColor : Colors.black,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedFilter = isSelected ? null : type;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(right: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primaryColor : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.primaryColor : Colors.grey.shade200,
+            width: 1.5,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primaryColor.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
-        side: BorderSide(
-          color: isSelected ? AppColors.primaryColor : Colors.grey.shade300,
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.grey.shade600,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            fontSize: 13,
+          ),
         ),
-        onSelected: (bool selected) {
-          setState(() {
-            _selectedFilter = selected ? type : null;
-          });
-        },
       ),
     );
   }
@@ -190,183 +247,252 @@ class _NotificationScreenState extends State<NotificationScreen> {
   IconData _getIcon(NotificationType type) {
     switch (type) {
       case NotificationType.task:
-        return Icons.event_note;
+        return Icons.task_alt_rounded;
       case NotificationType.safetyAlert:
-        return Icons.security;
+        return Icons.shield_rounded;
       case NotificationType.generalReminder:
-        return Icons.info_outline;
+        return Icons.notifications_active_rounded;
     }
   }
 
-  Color _getColor(NotificationType type) {
+  Color _getAccentColor(NotificationType type, {bool isCritical = false}) {
+    if (isCritical) return const Color(0xFFE53935);
     switch (type) {
       case NotificationType.task:
         return AppColors.primaryColor;
       case NotificationType.safetyAlert:
-        return Colors.red.shade600;
+        return const Color(0xFFE53935);
       case NotificationType.generalReminder:
-        return Colors.blue.shade600;
+        return const Color(0xFF2196F3);
     }
   }
 
-  Widget _buildTaskCard(Map<String, dynamic> notification, double screenWidth) {
+  Widget _buildNotificationCard(
+    Map<String, dynamic> notification,
+    double screenWidth,
+  ) {
     final type = notification['type'] as NotificationType;
     final isSafetyCritical =
         notification['taskType'] == TaskType.safetyCritical;
-    final cardColor = isSafetyCritical ? Colors.red.shade50 : Colors.white;
-    final borderColor = isSafetyCritical
-        ? Colors.red.shade400
-        : Colors.grey.shade200;
+    final accentColor = _getAccentColor(type, isCritical: isSafetyCritical);
 
-    return Card(
-      margin: EdgeInsets.only(bottom: screenWidth * 0.04),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: borderColor, width: isSafetyCritical ? 2 : 1),
+    return Dismissible(
+      key: Key(notification['id'].toString()),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 24),
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: AppColors.successGreen,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Icon(Icons.check_rounded, color: Colors.white, size: 28),
       ),
-      elevation: 2,
-      color: cardColor,
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(screenWidth * 0.04),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  _getIcon(type),
-                  color: _getColor(type),
-                  size: screenWidth * 0.08,
-                ),
-                SizedBox(width: screenWidth * 0.03),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        notification['title'],
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.045,
-                          fontWeight: FontWeight.bold,
-                          color: isSafetyCritical
-                              ? Colors.red.shade800
-                              : Colors.black87,
-                        ),
+      onDismissed: (_) => _markAsDone(notification),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            // Main content
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Icon container with gradient
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          accentColor.withOpacity(0.15),
+                          accentColor.withOpacity(0.05),
+                        ],
                       ),
-                      SizedBox(height: screenWidth * 0.015),
-                      Text(
-                        notification['time'],
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.035,
-                          color: isSafetyCritical
-                              ? Colors.red.shade600
-                              : Colors.grey.shade600,
-                        ),
-                      ),
-                      if (isSafetyCritical)
-                        Padding(
-                          padding: EdgeInsets.only(top: screenWidth * 0.015),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: screenWidth * 0.015,
-                              vertical: screenWidth * 0.007,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade100,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              "CRITICAL: T+${notification['escalationLevel']}m. Partner Notified.",
-                              style: TextStyle(
-                                fontSize: screenWidth * 0.03,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.red.shade700,
-                              ),
-                            ),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(_getIcon(type), color: accentColor, size: 24),
+                  ),
+                  const SizedBox(width: 16),
+                  // Text content
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          notification['title'],
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade800,
+                            height: 1.3,
                           ),
                         ),
-                      SizedBox(height: screenWidth * 0.02),
-                      Text(
-                        notification['body'],
-                        style: TextStyle(fontSize: screenWidth * 0.035),
-                      ),
-                    ],
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.access_time_rounded,
+                              size: 14,
+                              color: isSafetyCritical
+                                  ? accentColor
+                                  : Colors.grey.shade400,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              notification['time'],
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: isSafetyCritical
+                                    ? accentColor
+                                    : Colors.grey.shade500,
+                                fontWeight: isSafetyCritical
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ],
+                        ),
+                        // Critical badge
+                        if (isSafetyCritical) ...[
+                          const SizedBox(height: 10),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: accentColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.warning_amber_rounded,
+                                  size: 14,
+                                  color: accentColor,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  "Escalation Level ${notification['escalationLevel']}",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: accentColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 8),
+                        Text(
+                          notification['body'],
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade500,
+                            height: 1.4,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          // Action Buttons Section
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: screenWidth * 0.02,
-              vertical: screenWidth * 0.02,
-            ),
-            decoration: BoxDecoration(
-              color: isSafetyCritical ? Colors.white : Colors.grey.shade50,
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(16),
+                ],
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _actionButton(
-                  "Done",
-                  Icons.check_circle,
-                  AppColors.primaryColor,
-                  () {
-                    _markAsDone(notification);
-                  },
-                  screenWidth,
+            // Action buttons
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(20),
                 ),
-                _actionButton(
-                  isSafetyCritical ? "Running Late (+15m)" : "Not Now",
-                  isSafetyCritical ? Icons.timer_off : Icons.snooze,
-                  Colors.orange.shade700,
-                  () => _showNotNowOptions(notification),
-                  screenWidth,
-                ),
-                _actionButton(
-                  "Reschedule",
-                  Icons.schedule,
-                  Colors.blue.shade700,
-                  () => _reschedule(notification),
-                  screenWidth,
-                ),
-              ],
+              ),
+              child: Row(
+                children: [
+                  _actionChip(
+                    label: "Done",
+                    icon: Icons.check_rounded,
+                    color: AppColors.successGreen,
+                    onTap: () => _markAsDone(notification),
+                  ),
+                  const SizedBox(width: 8),
+                  _actionChip(
+                    label: isSafetyCritical ? "Late" : "Snooze",
+                    icon: isSafetyCritical
+                        ? Icons.timer_off_rounded
+                        : Icons.snooze_rounded,
+                    color: const Color(0xFFF57C00),
+                    onTap: () => _showNotNowOptions(notification),
+                  ),
+                  const SizedBox(width: 8),
+                  _actionChip(
+                    label: "Reschedule",
+                    icon: Icons.event_rounded,
+                    color: const Color(0xFF2196F3),
+                    onTap: () => _reschedule(notification),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _actionButton(
-    String label,
-    IconData icon,
-    Color color,
-    VoidCallback onPressed,
-    double screenWidth,
-  ) {
-    return Flexible(
-      child: TextButton.icon(
-        onPressed: onPressed,
-        style: TextButton.styleFrom(
-          padding: EdgeInsets.symmetric(
-            horizontal: screenWidth * 0.015,
-            vertical: screenWidth * 0.015,
-          ),
-        ),
-        icon: Icon(icon, size: screenWidth * 0.05, color: color),
-        label: Text(
-          label,
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.bold,
-            fontSize: screenWidth * 0.035,
+  Widget _actionChip({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 16, color: color),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -375,72 +501,97 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: const Text('Notification Centre'),
-        backgroundColor: AppColors.primaryColor,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_rounded,
+            color: Colors.grey.shade800,
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Notifications',
+          style: TextStyle(
+            color: Colors.grey.shade800,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Filter Chips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(
-              horizontal: screenWidth * 0.04,
-              vertical: screenWidth * 0.03,
-            ),
-            child: Row(
-              children: [
-                _buildFilterChip("All", null),
-                _buildFilterChip("Tasks", NotificationType.task),
-                _buildFilterChip("Safety Alerts", NotificationType.safetyAlert),
-                _buildFilterChip(
-                  "General Reminders",
-                  NotificationType.generalReminder,
-                ),
-              ],
+          // Filter chips
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildFilterChip("All", null),
+                  _buildFilterChip("Tasks", NotificationType.task),
+                  _buildFilterChip("Safety", NotificationType.safetyAlert),
+                  _buildFilterChip(
+                    "Reminders",
+                    NotificationType.generalReminder,
+                  ),
+                ],
+              ),
             ),
           ),
-          const Divider(height: 1),
-          // Notification List
+
+          // Notification list
           Expanded(
             child: _filteredNotifications.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.notifications_none,
-                          size: screenWidth * 0.2,
-                          color: Colors.grey.shade300,
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.notifications_off_rounded,
+                            size: 36,
+                            color: Colors.grey.shade400,
+                          ),
                         ),
+                        const SizedBox(height: 20),
                         Text(
-                          "No new notifications!",
+                          "All caught up!",
                           style: TextStyle(
-                            fontSize: screenWidth * 0.045,
-                            color: Colors.grey,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "No new notifications",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade500,
                           ),
                         ),
                       ],
                     ),
                   )
                 : ListView.builder(
-                    padding: EdgeInsets.fromLTRB(
-                      screenWidth * 0.04,
-                      screenWidth * 0.04,
-                      screenWidth * 0.04,
-                      screenWidth * 0.12,
-                    ), // Added bottom padding
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
                     itemCount: _filteredNotifications.length,
-                    itemBuilder: (context, index) => _buildTaskCard(
+                    itemBuilder: (context, index) => _buildNotificationCard(
                       _filteredNotifications[index],
-                      screenWidth,
+                      MediaQuery.of(context).size.width,
                     ),
                   ),
           ),

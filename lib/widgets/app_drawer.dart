@@ -91,16 +91,16 @@ class _AppDrawerState extends State<AppDrawer> {
             title: 'Profile',
             onTap: widget.onProfileTap,
           ),
-          _buildDrawerItem(
-            icon: Icons.settings,
-            title: 'Settings',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
-            },
-          ),
+          // _buildDrawerItem(
+          //   icon: Icons.settings,
+          //   title: 'Settings',
+          //   onTap: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(builder: (context) => const SettingsScreen()),
+          //     );
+          //   },
+          // ),
           _buildDrawerItem(
             icon: Icons.notifications,
             title: 'Notifications',

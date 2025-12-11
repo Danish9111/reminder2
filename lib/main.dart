@@ -1,12 +1,11 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:reminder_app/auth_wrapper.dart';
+import 'package:reminder_app/providers/chat_provider.dart';
 import 'package:reminder_app/providers/family_provider.dart';
 import 'package:reminder_app/providers/task_provider.dart';
 import 'package:reminder_app/providers/auth_provider.dart';
 import 'package:reminder_app/providers/user_provider.dart';
-import 'package:reminder_app/services/push_notification_service.dart';
 import 'package:reminder_app/widgets/custom_snackbar.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -32,6 +31,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (context) => FamilyProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
       ],
       child: MaterialApp(
         navigatorKey: navigatorKey, // Required for Snackbar

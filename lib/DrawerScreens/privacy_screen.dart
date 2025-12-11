@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:reminder_app/DrawerScreens/SubscriptionConfirm.dart'
-    as AppColors;
+import 'package:reminder_app/AppColors/AppColors.dart';
 import 'package:reminder_app/widgets/custom_snackbar.dart';
 
 class PrivacyScreen extends StatefulWidget {
@@ -11,19 +10,7 @@ class PrivacyScreen extends StatefulWidget {
 }
 
 class _PrivacyScreenState extends State<PrivacyScreen> {
-  // Data Sharing Settings
-  bool _shareTasksWithFamily = true;
-  bool _shareLocationWithFamily = false;
-  bool _shareCompletionStats = true;
-
-  // Visibility Settings
-  bool _showProfileToFamily = true;
-  bool _showActivityStatus = true;
-  bool _showBadges = true;
-
-  // Security Settings
-  bool _requirePinForApp = false;
-  bool _biometricUnlock = false;
+  // Simple privacy toggles
   bool _hideNotificationContent = false;
 
   void _showDeleteDataDialog() {
@@ -76,60 +63,30 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
     );
   }
 
-  void _showExportDataDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
-          children: [
-            Icon(Icons.download, color: AppColors.primaryColor, size: 28),
-            SizedBox(width: 12),
-            Text('Export Your Data'),
-          ],
-        ),
-        content: const Text(
-          'Download a copy of all your tasks, reminders, and personal information. The data will be exported as a file.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey.shade600),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              CustomSnackbar.show(
-                title: 'Export',
-                message: 'Preparing your data export...',
-                icon: Icons.download,
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Export', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Privacy'),
-        backgroundColor: AppColors.primaryColor,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_rounded,
+            color: Colors.grey.shade800,
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Privacy',
+          style: TextStyle(
+            color: Colors.grey.shade800,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -137,145 +94,22 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Data Sharing Section
+              // Notification Privacy
               const Text(
-                'Family Sharing',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Control what family members can see',
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-              ),
-              const SizedBox(height: 12),
-              _buildSectionCard(
-                child: Column(
-                  children: [
-                    _buildToggleItem(
-                      icon: Icons.task_alt,
-                      iconColor: AppColors.primaryColor,
-                      title: 'Share Tasks',
-                      subtitle: 'Family members can see your assigned tasks',
-                      value: _shareTasksWithFamily,
-                      onChanged: (value) {
-                        setState(() => _shareTasksWithFamily = value);
-                      },
-                    ),
-                    Divider(color: Colors.grey.shade200, height: 1),
-                    _buildToggleItem(
-                      icon: Icons.location_on,
-                      iconColor: Colors.blue.shade600,
-                      title: 'Share Location',
-                      subtitle: 'For safety check-ins and task coordination',
-                      value: _shareLocationWithFamily,
-                      onChanged: (value) {
-                        setState(() => _shareLocationWithFamily = value);
-                      },
-                    ),
-                    Divider(color: Colors.grey.shade200, height: 1),
-                    _buildToggleItem(
-                      icon: Icons.bar_chart,
-                      iconColor: Colors.orange.shade600,
-                      title: 'Share Completion Stats',
-                      subtitle: 'Show your task completion statistics',
-                      value: _shareCompletionStats,
-                      onChanged: (value) {
-                        setState(() => _shareCompletionStats = value);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Profile Visibility Section
-              const Text(
-                'Profile Visibility',
+                'Notifications',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               _buildSectionCard(
-                child: Column(
-                  children: [
-                    _buildToggleItem(
-                      icon: Icons.person,
-                      iconColor: AppColors.primaryColor,
-                      title: 'Show Profile',
-                      subtitle: 'Let family members view your profile',
-                      value: _showProfileToFamily,
-                      onChanged: (value) {
-                        setState(() => _showProfileToFamily = value);
-                      },
-                    ),
-                    Divider(color: Colors.grey.shade200, height: 1),
-                    _buildToggleItem(
-                      icon: Icons.circle,
-                      iconColor: Colors.green.shade600,
-                      title: 'Activity Status',
-                      subtitle: 'Show when you\'re active in the app',
-                      value: _showActivityStatus,
-                      onChanged: (value) {
-                        setState(() => _showActivityStatus = value);
-                      },
-                    ),
-                    Divider(color: Colors.grey.shade200, height: 1),
-                    _buildToggleItem(
-                      icon: Icons.emoji_events,
-                      iconColor: Colors.amber.shade600,
-                      title: 'Show Badges',
-                      subtitle: 'Display earned badges on your profile',
-                      value: _showBadges,
-                      onChanged: (value) {
-                        setState(() => _showBadges = value);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Security Section
-              const Text(
-                'Security',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              _buildSectionCard(
-                child: Column(
-                  children: [
-                    _buildToggleItem(
-                      icon: Icons.pin,
-                      iconColor: AppColors.primaryColor,
-                      title: 'App Lock',
-                      subtitle: 'Require PIN to open the app',
-                      value: _requirePinForApp,
-                      onChanged: (value) {
-                        setState(() => _requirePinForApp = value);
-                      },
-                    ),
-                    Divider(color: Colors.grey.shade200, height: 1),
-                    _buildToggleItem(
-                      icon: Icons.fingerprint,
-                      iconColor: Colors.teal.shade600,
-                      title: 'Biometric Unlock',
-                      subtitle: 'Use fingerprint or face to unlock',
-                      value: _biometricUnlock,
-                      onChanged: (value) {
-                        setState(() => _biometricUnlock = value);
-                      },
-                    ),
-                    Divider(color: Colors.grey.shade200, height: 1),
-                    _buildToggleItem(
-                      icon: Icons.visibility_off,
-                      iconColor: Colors.grey.shade600,
-                      title: 'Hide Notification Content',
-                      subtitle: 'Hide task details in notifications',
-                      value: _hideNotificationContent,
-                      onChanged: (value) {
-                        setState(() => _hideNotificationContent = value);
-                      },
-                    ),
-                  ],
+                child: _buildToggleItem(
+                  icon: Icons.visibility_off,
+                  iconColor: Colors.grey.shade600,
+                  title: 'Hide Notification Content',
+                  subtitle: 'Hide task details in notifications',
+                  value: _hideNotificationContent,
+                  onChanged: (value) {
+                    setState(() => _hideNotificationContent = value);
+                  },
                 ),
               ),
               const SizedBox(height: 24),
@@ -287,25 +121,13 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
               ),
               const SizedBox(height: 12),
               _buildSectionCard(
-                child: Column(
-                  children: [
-                    _buildActionItem(
-                      icon: Icons.download,
-                      iconColor: AppColors.primaryColor,
-                      title: 'Export My Data',
-                      subtitle: 'Download a copy of your information',
-                      onTap: _showExportDataDialog,
-                    ),
-                    Divider(color: Colors.grey.shade200, height: 1),
-                    _buildActionItem(
-                      icon: Icons.delete_forever,
-                      iconColor: Colors.red.shade600,
-                      title: 'Delete All Data',
-                      subtitle: 'Permanently remove all your data',
-                      onTap: _showDeleteDataDialog,
-                      isDestructive: true,
-                    ),
-                  ],
+                child: _buildActionItem(
+                  icon: Icons.delete_forever,
+                  iconColor: Colors.red.shade600,
+                  title: 'Delete All Data',
+                  subtitle: 'Permanently remove all your data',
+                  onTap: _showDeleteDataDialog,
+                  isDestructive: true,
                 ),
               ),
               const SizedBox(height: 24),
@@ -314,7 +136,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
               _buildSectionCard(
                 child: _buildActionItem(
                   icon: Icons.policy,
-                  iconColor: Colors.grey.shade600,
+                  iconColor: AppColors.primaryColor,
                   title: 'Privacy Policy',
                   subtitle: 'Read our privacy policy',
                   onTap: () {
@@ -361,7 +183,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
     required ValueChanged<bool> onChanged,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           Container(
@@ -414,7 +236,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
             Container(

@@ -96,10 +96,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
-        backgroundColor: AppColors.primaryColor,
-        foregroundColor: Colors.white,
-        elevation: 4,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_rounded,
+            color: Colors.grey.shade800,
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Settings',
+          style: TextStyle(
+            color: Colors.grey.shade800,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: Padding(
         padding: EdgeInsets.only(

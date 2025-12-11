@@ -1,9 +1,12 @@
 // filename: FamilyChatScreen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:reminder_app/AppColors/AppColors.dart';
-import 'package:reminder_app/DrawerScreens/FamilyPage.dart'
-    as appColors; // For SystemUiOverlayStyle
+import 'package:reminder_app/models/message_model.dart';
+import 'package:reminder_app/providers/chat_provider.dart';
+import 'package:reminder_app/providers/family_provider.dart';
+import 'package:reminder_app/providers/user_provider.dart';
+import 'package:reminder_app/utils/auth_utils.dart';
 
 class FamilyChatScreen extends StatefulWidget {
   const FamilyChatScreen({Key? key}) : super(key: key);
@@ -16,38 +19,41 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  final List<Map<String, dynamic>> _messages = [
-    {
-      'sender': 'Hazrat',
-      'text': 'Soccer practice ends at 4:30 today, not 5:00!',
-      'isMe': false,
-      'type': 'text',
-      'timestamp': '2:30 PM',
-    },
-    {
-      'sender': 'Mom',
-      'text': 'Thanks for letting us know.',
-      'isMe': true,
-      'type': 'text',
-      'timestamp': '2:32 PM',
-    },
-    {
-      'sender': 'Dad',
-      'text': 'I can pick him up on my way back.',
-      'isMe': false,
-      'type': 'text',
-      'timestamp': '2:35 PM',
-      'aiSuggestion': true,
-      'aiAction': 'Create Reminder: Pick up Hazrat @ 4:30 PM',
-    },
-    {
-      'sender': 'Azy',
-      'text': '',
-      'isMe': false,
-      'type': 'image',
-      'timestamp': '3:00 PM',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Start listening to messages when screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initChat();
+    });
+  }
+
+  void _initChat() {
+    final familyProvider = context.read<FamilyProvider>();
+    final chatProvider = context.read<ChatProvider>();
+
+    // Load family if not already loaded
+    if (familyProvider.family == null) {
+      familyProvider.loadFamily().then((_) {
+        final familyId = familyProvider.family?.id;
+        if (familyId != null) {
+          chatProvider.listenToMessages(familyId);
+        }
+      });
+    } else {
+      final familyId = familyProvider.family?.id;
+      if (familyId != null) {
+        chatProvider.listenToMessages(familyId);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,59 +63,91 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
-      // appBar: AppBar(
-      //   backgroundColor: primaryColor,
-      //   systemOverlayStyle: SystemUiOverlayStyle.light,
-      //   iconTheme: const IconThemeData(color: Colors.white),
-      //   title: Column(
-      //     crossAxisAlignment: CrossAxisAlignment.start,
-      //     children: [
-      //       Text(
-      //         "The Super Family",
-      //         style: TextStyle(
-      //           fontSize: 18 * textScale,
-      //           fontWeight: FontWeight.bold,
-      //           color: Colors.white,
-      //         ),
-      //       ),
-      //       Text(
-      //         "4 members • Online",
-      //         style: TextStyle(
-      //           fontSize: 12 * textScale,
-      //           color: Colors.white70,
-      //         ),
-      //       ),
-      //     ],
-      //   ),
-      //   actions: [
-      //     IconButton(
-      //       icon: Icon(Icons.call, size: screenWidth * 0.07),
-      //       onPressed: () {},
-      //     ),
-      //     IconButton(
-      //       icon: Icon(Icons.more_vert, size: screenWidth * 0.07),
-      //       onPressed: () {},
-      //     ),
-      //   ],
-      // ),
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.04,
-                vertical: screenHeight * 0.02,
-              ),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final msg = _messages[index];
-                return Column(
-                  children: [
-                    _buildMessageBubble(msg, screenWidth, textScale),
-                    if (msg['aiSuggestion'] == true)
-                      _buildAiSuggestionChip(screenWidth, textScale),
-                  ],
+            child: Consumer<ChatProvider>(
+              builder: (context, chatProvider, _) {
+                if (chatProvider.isLoading && chatProvider.messages.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (chatProvider.error != null &&
+                    chatProvider.messages.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Failed to load messages',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                        TextButton(
+                          onPressed: _initChat,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                if (chatProvider.messages.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.chat_bubble_outline,
+                          size: 64,
+                          color: Colors.grey[300],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No messages yet',
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Start a conversation with your family!',
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                // Messages are in descending order, reverse for display
+                final messages = chatProvider.messages.reversed.toList();
+
+                return ListView.builder(
+                  controller: _scrollController,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.04,
+                    vertical: screenHeight * 0.02,
+                  ),
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final msg = messages[index];
+                    return Column(
+                      children: [
+                        _buildMessageBubble(msg, screenWidth, textScale),
+                        if (_shouldShowAiSuggestion(msg.text))
+                          _buildAiSuggestionChip(screenWidth, textScale),
+                      ],
+                    );
+                  },
                 );
               },
             ),
@@ -118,6 +156,16 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
         ],
       ),
     );
+  }
+
+  /// Check if message text suggests an actionable task
+  bool _shouldShowAiSuggestion(String text) {
+    final lowerText = text.toLowerCase();
+    return lowerText.contains('buy') ||
+        lowerText.contains('bring') ||
+        lowerText.contains('appointment') ||
+        lowerText.contains('pick up') ||
+        lowerText.contains('remind');
   }
 
   Widget _buildAiSuggestionChip(double screenWidth, double textScale) {
@@ -171,7 +219,7 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(width: 4),
+                const SizedBox(width: 4),
                 const Icon(Icons.star, size: 12, color: Colors.amber),
               ],
             ),
@@ -182,11 +230,11 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
   }
 
   Widget _buildMessageBubble(
-    Map<String, dynamic> msg,
+    MessageModel msg,
     double screenWidth,
     double textScale,
   ) {
-    final isMe = msg['isMe'];
+    final isMe = msg.isSentBy(currentUid);
 
     return Column(
       crossAxisAlignment: isMe
@@ -201,7 +249,7 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
               top: 6,
             ),
             child: Text(
-              msg['sender'],
+              msg.senderName,
               style: TextStyle(
                 fontSize: 12 * textScale,
                 color: Colors.grey[600],
@@ -242,21 +290,34 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (msg['type'] == 'image')
-                Container(
-                  height: screenWidth * 0.4,
-                  width: screenWidth * 0.55,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.image, size: 40, color: Colors.grey),
+              if (msg.type == 'image' && msg.mediaUrl != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    msg.mediaUrl!,
+                    height: screenWidth * 0.4,
+                    width: screenWidth * 0.55,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      height: screenWidth * 0.4,
+                      width: screenWidth * 0.55,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.broken_image,
+                          size: 40,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
                   ),
                 )
               else
                 Text(
-                  msg['text'],
+                  msg.text,
                   style: TextStyle(
                     color: isMe ? Colors.white : Colors.black87,
                     fontSize: 16 * textScale,
@@ -266,7 +327,7 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
               Align(
                 alignment: Alignment.bottomRight,
                 child: Text(
-                  msg['timestamp'],
+                  _formatTimestamp(msg.timestamp),
                   style: TextStyle(
                     fontSize: 10 * textScale,
                     color: isMe ? Colors.white70 : Colors.grey[500],
@@ -278,6 +339,25 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
         ),
       ],
     );
+  }
+
+  String _formatTimestamp(DateTime timestamp) {
+    final now = DateTime.now();
+    final diff = now.difference(timestamp);
+
+    if (diff.inMinutes < 1) {
+      return 'Now';
+    } else if (diff.inHours < 1) {
+      return '${diff.inMinutes}m ago';
+    } else if (diff.inDays < 1) {
+      final hour = timestamp.hour;
+      final minute = timestamp.minute.toString().padLeft(2, '0');
+      final period = hour >= 12 ? 'PM' : 'AM';
+      final hour12 = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+      return '$hour12:$minute $period';
+    } else {
+      return '${timestamp.day}/${timestamp.month}';
+    }
   }
 
   Widget _buildInputArea(
@@ -358,30 +438,26 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
     if (_messageController.text.trim().isEmpty) return;
     final text = _messageController.text.trim();
 
-    bool triggerAi =
-        text.toLowerCase().contains("buy") ||
-        text.toLowerCase().contains("bring") ||
-        text.toLowerCase().contains("appointment");
+    final userProvider = context.read<UserProvider>();
+    final chatProvider = context.read<ChatProvider>();
 
-    setState(() {
-      _messages.add({
-        'sender': 'Me',
-        'text': text,
-        'isMe': true,
-        'type': 'text',
-        'timestamp': 'Now',
-        'aiSuggestion': triggerAi,
-      });
-    });
+    chatProvider.sendMessage(
+      text: text,
+      senderName: userProvider.user?.name ?? 'Unknown',
+      senderPhotoUrl: userProvider.user?.photoUrl,
+    );
 
     _messageController.clear();
 
-    Future.delayed(const Duration(milliseconds: 100), () {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+    // Scroll to bottom after sending
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
     });
   }
 }

@@ -21,10 +21,25 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Subscription & Checkout'),
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_rounded,
+            color: Colors.grey.shade800,
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Subscription & Checkout',
+          style: TextStyle(
+            color: Colors.grey.shade800,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -319,11 +334,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         vertical: screenWidth * 0.025,
       ),
       child: SafeArea(
-        child: CustomButton.primary(
-          text: buttonText,
-          size: ButtonSize.large,
-          onPressed: onSubscribe,
-        ),
+        child: CustomButton.primary(text: buttonText, onPressed: onSubscribe),
       ),
     );
   }
