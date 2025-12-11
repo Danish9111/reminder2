@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:reminder_app/auth_wrapper.dart';
 import 'package:reminder_app/providers/chat_provider.dart';
 import 'package:reminder_app/providers/family_provider.dart';
 import 'package:reminder_app/providers/task_provider.dart';
 import 'package:reminder_app/providers/auth_provider.dart';
 import 'package:reminder_app/providers/user_provider.dart';
+import 'package:reminder_app/services/push_notification_service.dart';
 import 'package:reminder_app/widgets/custom_snackbar.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -14,9 +16,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  // Register background message handler
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  // await PushNotificationService.init();
+  // Initialize push notifications
+  await PushNotificationService.init();
+
   runApp(const MyApp());
 }
 

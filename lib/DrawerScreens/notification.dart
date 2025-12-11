@@ -503,53 +503,84 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_rounded,
-            color: Colors.grey.shade800,
-            size: 20,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Notifications',
-          style: TextStyle(
-            color: Colors.grey.shade800,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          // Filter chips
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildFilterChip("All", null),
-                  _buildFilterChip("Tasks", NotificationType.task),
-                  _buildFilterChip("Safety", NotificationType.safetyAlert),
-                  _buildFilterChip(
-                    "Reminders",
-                    NotificationType.generalReminder,
+      body: CustomScrollView(
+        slivers: [
+          // Premium App Bar
+          SliverAppBar(
+            expandedHeight: 120,
+            floating: false,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.grey.shade800,
+            flexibleSpace: FlexibleSpaceBar(
+              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+              title: Text(
+                'Notifications',
+                style: TextStyle(
+                  color: Colors.grey.shade800,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              background: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              Container(
+                margin: const EdgeInsets.only(right: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.tune_rounded,
+                    color: Colors.grey.shade600,
+                    size: 22,
                   ),
-                ],
+                  onPressed: () {},
+                ),
+              ),
+            ],
+          ),
+
+          // Filter chips
+          SliverToBoxAdapter(
+            child: Container(
+              color: Colors.white,
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildFilterChip("All", null),
+                    _buildFilterChip("Tasks", NotificationType.task),
+                    _buildFilterChip("Safety", NotificationType.safetyAlert),
+                    _buildFilterChip(
+                      "Reminders",
+                      NotificationType.generalReminder,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
 
           // Notification list
-          Expanded(
-            child: _filteredNotifications.isEmpty
-                ? Center(
+          _filteredNotifications.isEmpty
+              ? SliverFillRemaining(
+                  child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -585,16 +616,20 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         ),
                       ],
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
-                    itemCount: _filteredNotifications.length,
-                    itemBuilder: (context, index) => _buildNotificationCard(
-                      _filteredNotifications[index],
-                      MediaQuery.of(context).size.width,
+                  ),
+                )
+              : SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _buildNotificationCard(
+                        _filteredNotifications[index],
+                        MediaQuery.of(context).size.width,
+                      ),
+                      childCount: _filteredNotifications.length,
                     ),
                   ),
-          ),
+                ),
         ],
       ),
     );
