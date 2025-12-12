@@ -23,19 +23,46 @@ public class MainActivity extends FlutterActivity {
                                 int id = call.argument("id");
                                 String title = call.argument("title");
                                 String body = call.argument("body");
-                                scheduleExactAlarm(id, time, title, body);
+                                String taskType = call.argument("taskType");
+                                if (taskType == null)
+                                    taskType = "standard";
+
+                                scheduleExactAlarm(id, time, title, body, taskType);
                                 result.success("Alarm scheduled");
+                            } else if (call.method.equals("saveQuietHours")) {
+                                boolean enabled = call.argument("enabled");
+                                int startHour = call.argument("startHour");
+                                int startMinute = call.argument("startMinute");
+                                int endHour = call.argument("endHour");
+                                int endMinute = call.argument("endMinute");
+                                String days = call.argument("days");
+                                boolean exceptionSafetyCritical = call.argument("exceptionSafetyCritical");
+
+                                QuietHoursHelper.saveSettings(
+                                        this,
+                                        enabled,
+                                        startHour,
+                                        startMinute,
+                                        endHour,
+                                        endMinute,
+                                        days,
+                                        exceptionSafetyCritical);
+                                result.success("Quiet hours saved");
+                            } else if (call.method.equals("getQuietHours")) {
+                                java.util.HashMap<String, Object> settings = QuietHoursHelper.getSettings(this);
+                                result.success(settings);
                             } else {
                                 result.notImplemented();
                             }
                         });
     }
 
-    private void scheduleExactAlarm(int id, long timeMillis, String title, String body) {
+    private void scheduleExactAlarm(int id, long timeMillis, String title, String body, String taskType) {
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         Intent intent = new Intent(this, AlarmReceiver.class);
         intent.putExtra("title", title);
         intent.putExtra("body", body);
+        intent.putExtra("taskType", taskType);
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 this,

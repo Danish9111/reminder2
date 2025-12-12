@@ -232,6 +232,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     DateTime dateTime,
     String title,
     List<String> assignees,
+    String taskType,
   ) async {
     try {
       final int alarmId = dateTime.millisecondsSinceEpoch ~/ 1000;
@@ -243,6 +244,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         'id': alarmId,
         'title': title,
         'body': body,
+        'taskType': taskType,
       });
 
       debugPrint('Alarm scheduled for: $dateTime');
@@ -381,6 +383,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         fullDateTime,
         _taskController.text.trim(),
         assigneesList,
+        _selectedTaskType.name, // "standard" or "safetyCritical"
       );
 
       CustomSnackbar.show(
