@@ -140,9 +140,27 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final msg = messages[index];
+
+                    // Determine position in consecutive sequence from same sender
+                    final prevMsg = index > 0 ? messages[index - 1] : null;
+                    final nextMsg = index < messages.length - 1
+                        ? messages[index + 1]
+                        : null;
+
+                    final isFirstInSequence =
+                        prevMsg == null || prevMsg.senderId != msg.senderId;
+                    final isLastInSequence =
+                        nextMsg == null || nextMsg.senderId != msg.senderId;
+
                     return Column(
                       children: [
-                        _buildMessageBubble(msg, screenWidth, textScale),
+                        _buildMessageBubble(
+                          msg,
+                          screenWidth,
+                          textScale,
+                          isFirstInSequence: isFirstInSequence,
+                          isLastInSequence: isLastInSequence,
+                        ),
                         if (_shouldShowAiSuggestion(msg.text))
                           _buildAiSuggestionChip(screenWidth, textScale),
                       ],
@@ -232,16 +250,67 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
   Widget _buildMessageBubble(
     MessageModel msg,
     double screenWidth,
-    double textScale,
-  ) {
+    double textScale, {
+    required bool isFirstInSequence,
+    required bool isLastInSequence,
+  }) {
     final isMe = msg.isSentBy(currentUid);
+
+    // Determine corner radii based on position in sequence
+    // For consecutive messages from same sender:
+    // - First message: pointed corner at top (sender's side)
+    // - Middle messages: all corners rounded
+    // - Last message: pointed corner at bottom (sender's side)
+    // - Single message (first && last): pointed corner at bottom only
+
+    const double fullRadius = 18.0;
+    const double smallRadius = 4.0;
+
+    double topLeftRadius = fullRadius;
+    double topRightRadius = fullRadius;
+    double bottomLeftRadius = fullRadius;
+    double bottomRightRadius = fullRadius;
+
+    if (isMe) {
+      // My messages - small corners on the right side create chain effect
+      if (isFirstInSequence && isLastInSequence) {
+        // Single message - small corner at bottom right only
+        bottomRightRadius = smallRadius;
+      } else if (isFirstInSequence) {
+        // First in sequence - small corner at bottom right (connects to next)
+        bottomRightRadius = smallRadius;
+      } else if (isLastInSequence) {
+        // Last in sequence - small corner at top right (connects to previous)
+        topRightRadius = smallRadius;
+      } else {
+        // Middle messages - small corners at both top and bottom right (connects both ways)
+        topRightRadius = smallRadius;
+        bottomRightRadius = smallRadius;
+      }
+    } else {
+      // Other's messages - small corners on the left side create chain effect
+      if (isFirstInSequence && isLastInSequence) {
+        // Single message - small corner at bottom left only
+        bottomLeftRadius = smallRadius;
+      } else if (isFirstInSequence) {
+        // First in sequence - small corner at bottom left (connects to next)
+        bottomLeftRadius = smallRadius;
+      } else if (isLastInSequence) {
+        // Last in sequence - small corner at top left (connects to previous)
+        topLeftRadius = smallRadius;
+      } else {
+        // Middle messages - small corners at both top and bottom left (connects both ways)
+        topLeftRadius = smallRadius;
+        bottomLeftRadius = smallRadius;
+      }
+    }
 
     return Column(
       crossAxisAlignment: isMe
           ? CrossAxisAlignment.end
           : CrossAxisAlignment.start,
       children: [
-        if (!isMe)
+        if (!isMe && isFirstInSequence)
           Padding(
             padding: EdgeInsets.only(
               left: screenWidth * 0.03,
@@ -257,84 +326,94 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
               ),
             ),
           ),
-        Container(
-          margin: EdgeInsets.only(
-            bottom: screenWidth * 0.01,
-            right: isMe ? 0 : screenWidth * 0.2,
-            left: isMe ? screenWidth * 0.2 : 0,
-          ),
-          padding: EdgeInsets.symmetric(
-            horizontal: screenWidth * 0.04,
-            vertical: screenWidth * 0.03,
-          ),
-          decoration: BoxDecoration(
-            color: isMe ? AppColors.primaryColor : Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(20),
-              topRight: const Radius.circular(20),
-              bottomLeft: isMe
-                  ? const Radius.circular(20)
-                  : const Radius.circular(4),
-              bottomRight: isMe
-                  ? const Radius.circular(4)
-                  : const Radius.circular(20),
+        Align(
+          alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: screenWidth * 0.75, // Max 75% of screen width
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 5,
-                offset: const Offset(0, 2),
+            margin: EdgeInsets.only(bottom: screenWidth * 0.01),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: isMe ? AppColors.primaryColor : Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(topLeftRadius),
+                topRight: Radius.circular(topRightRadius),
+                bottomLeft: Radius.circular(bottomLeftRadius),
+                bottomRight: Radius.circular(bottomRightRadius),
               ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (msg.type == 'image' && msg.mediaUrl != null)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    msg.mediaUrl!,
-                    height: screenWidth * 0.4,
-                    width: screenWidth * 0.55,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      height: screenWidth * 0.4,
-                      width: screenWidth * 0.55,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: msg.type == 'image' && msg.mediaUrl != null
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.broken_image,
-                          size: 40,
-                          color: Colors.grey,
+                        child: Image.network(
+                          msg.mediaUrl!,
+                          height: screenWidth * 0.4,
+                          width: screenWidth * 0.55,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                height: screenWidth * 0.4,
+                                width: screenWidth * 0.55,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.broken_image,
+                                    size: 40,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatTimestamp(msg.timestamp),
+                        style: TextStyle(
+                          fontSize: 10 * textScale,
+                          color: isMe ? Colors.white70 : Colors.grey[500],
+                        ),
+                      ),
+                    ],
+                  )
+                : Wrap(
+                    alignment: WrapAlignment.end,
+                    crossAxisAlignment: WrapCrossAlignment.end,
+                    spacing: 8,
+                    children: [
+                      Text(
+                        msg.text,
+                        style: TextStyle(
+                          color: isMe ? Colors.white : Colors.black87,
+                          fontSize: 16 * textScale,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          _formatTimestamp(msg.timestamp),
+                          style: TextStyle(
+                            fontSize: 10 * textScale,
+                            color: isMe ? Colors.white70 : Colors.grey[500],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                )
-              else
-                Text(
-                  msg.text,
-                  style: TextStyle(
-                    color: isMe ? Colors.white : Colors.black87,
-                    fontSize: 16 * textScale,
-                  ),
-                ),
-              SizedBox(height: screenWidth * 0.01),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Text(
-                  _formatTimestamp(msg.timestamp),
-                  style: TextStyle(
-                    fontSize: 10 * textScale,
-                    color: isMe ? Colors.white70 : Colors.grey[500],
-                  ),
-                ),
-              ),
-            ],
           ),
         ),
       ],

@@ -13,6 +13,7 @@ class UserProvider extends ChangeNotifier {
 
   Future<void> loadUser() async {
     final uid = currentUid;
+    // if (user != null) return;
     if (uid == null) {
       error = "User not found";
       notifyListeners();

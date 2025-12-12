@@ -413,185 +413,191 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           children: [
             // Scrollable content
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    // Task Card
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 20,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Task Input
-                            TextField(
-                              controller: _taskController,
-                              maxLines: 2,
-                              style: const TextStyle(fontSize: 16),
-                              decoration: InputDecoration(
-                                hintText: "What needs to be done?",
-                                hintStyle: TextStyle(
-                                  color: Colors.grey.shade400,
-                                ),
-                                filled: true,
-                                fillColor: Colors.grey.shade50,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                                contentPadding: const EdgeInsets.all(16),
-                              ),
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Date & Time Row
-                            Row(
-                              children: [
-                                Expanded(child: _buildDateButton()),
-                                const SizedBox(width: 12),
-                                Expanded(child: _buildTimeButton()),
-                              ],
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Assignees
-                            _buildAssignees(),
-
-                            const SizedBox(height: 16),
-
-                            // Task Type Toggle
-                            _buildTaskType(isSafetyCritical),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Photo Proof Section - Only visible for Critical tasks
-                    if (isSafetyCritical) ...[
-                      const SizedBox(height: 8),
+              child: RefreshIndicator(
+                onRefresh: () =>
+                    context.read<FamilyProvider>().refreshFamilyMembers(),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      // Task Card
                       Container(
-                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.red.shade200),
+                          borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.red.withOpacity(0.08),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 20,
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.camera_alt,
-                                  color: Colors.red.shade600,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  "Photo Proof Required",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.red.shade700,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Task Input
+                              TextField(
+                                controller: _taskController,
+                                maxLines: 2,
+                                style: const TextStyle(fontSize: 16),
+                                decoration: InputDecoration(
+                                  hintText: "What needs to be done?",
+                                  hintStyle: TextStyle(
+                                    color: Colors.grey.shade400,
                                   ),
+                                  filled: true,
+                                  fillColor: Colors.grey.shade50,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: const EdgeInsets.all(16),
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
+                              ),
 
-                            if (_capturedImage == null)
-                              GestureDetector(
-                                onTap: _showImageSourceOptions,
-                                child: Container(
-                                  width: double.infinity,
-                                  height: 120,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade100,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: Colors.grey.shade300,
-                                    ),
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.add_a_photo,
-                                        size: 36,
-                                        color: AppColors.primaryColor,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        "Tap to add photo",
-                                        style: TextStyle(
-                                          color: Colors.grey.shade600,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                            else
-                              Stack(
+                              const SizedBox(height: 16),
+
+                              // Date & Time Row
+                              Row(
                                 children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Image.file(
-                                      _capturedImage!,
-                                      width: double.infinity,
-                                      height: 150,
-                                      fit: BoxFit.cover,
-                                    ),
+                                  Expanded(child: _buildDateButton()),
+                                  const SizedBox(width: 12),
+                                  Expanded(child: _buildTimeButton()),
+                                ],
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Assignees
+                              _buildAssignees(),
+
+                              const SizedBox(height: 16),
+
+                              // Task Type Toggle
+                              _buildTaskType(isSafetyCritical),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Photo Proof Section - Only visible for Critical tasks
+                      if (isSafetyCritical) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.red.shade200),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.red.withOpacity(0.08),
+                                blurRadius: 10,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.camera_alt,
+                                    color: Colors.red.shade600,
+                                    size: 20,
                                   ),
-                                  Positioned(
-                                    top: 8,
-                                    right: 8,
-                                    child: GestureDetector(
-                                      onTap: _removePhoto,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(6),
-                                        decoration: BoxDecoration(
-                                          color: Colors.red.shade600,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.close,
-                                          color: Colors.white,
-                                          size: 18,
-                                        ),
-                                      ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    "Photo Proof Required",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.red.shade700,
                                     ),
                                   ),
                                 ],
                               ),
-                          ],
+                              const SizedBox(height: 12),
+
+                              if (_capturedImage == null)
+                                GestureDetector(
+                                  onTap: _showImageSourceOptions,
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: Colors.grey.shade300,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.add_a_photo,
+                                          size: 36,
+                                          color: AppColors.primaryColor,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          "Tap to add photo",
+                                          style: TextStyle(
+                                            color: Colors.grey.shade600,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              else
+                                Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Image.file(
+                                        _capturedImage!,
+                                        width: double.infinity,
+                                        height: 150,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 8,
+                                      right: 8,
+                                      child: GestureDetector(
+                                        onTap: _removePhoto,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(6),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.shade600,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.close,
+                                            color: Colors.white,
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),

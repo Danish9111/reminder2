@@ -429,30 +429,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               color: Colors.grey.shade600,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            joinCode,
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 3,
-                              color: AppColors.primaryColor,
-                            ),
+                          // const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Text(
+                                joinCode,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 3,
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  Clipboard.setData(
+                                    ClipboardData(text: joinCode),
+                                  );
+                                  CustomSnackbar.show(
+                                    title: 'Copied!',
+                                    message: 'Family code copied to clipboard',
+                                    icon: Icons.copy,
+                                  );
+                                },
+                                icon: Icon(
+                                  Icons.copy,
+                                  color: AppColors.primaryColor,
+                                ),
+                                tooltip: 'Copy code',
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        Clipboard.setData(ClipboardData(text: joinCode));
-                        CustomSnackbar.show(
-                          title: 'Copied!',
-                          message: 'Family code copied to clipboard',
-                          icon: Icons.copy,
-                        );
-                      },
-                      icon: Icon(Icons.copy, color: AppColors.primaryColor),
-                      tooltip: 'Copy code',
                     ),
                   ],
                 ),

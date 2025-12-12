@@ -22,6 +22,7 @@ class FamilyProvider extends ChangeNotifier {
 
   Future<void> loadFamily() async {
     try {
+      if (_family != null) return;
       _isLoading = true;
       _error = null;
       notifyListeners();
@@ -38,7 +39,19 @@ class FamilyProvider extends ChangeNotifier {
     }
   }
 
+  //normal fetch for cache
   Future<void> loadFamilyMembers() async {
+    if (_members.isNotEmpty) return;
+    await fetchFamilyMembers();
+  }
+
+  //memebers refresh on refresh indicator
+  Future<void> refreshFamilyMembers() async {
+    _members.clear();
+    await fetchFamilyMembers();
+  }
+
+  Future<void> fetchFamilyMembers() async {
     try {
       _isMembersLoading = true;
       _error = null;
