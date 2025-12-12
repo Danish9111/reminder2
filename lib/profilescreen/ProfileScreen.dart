@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:reminder_app/AddTaskScreen/AddTaskScreen.dart';
 import 'package:reminder_app/AppColors/AppColors.dart';
 import 'package:reminder_app/Authentication_Onboarding/Login+Otp/login.dart';
 import 'package:reminder_app/DrawerScreens/Subscriptions_&_checkout.dart';
