@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:reminder_app/AppColors/AppColors.dart';
 import 'package:reminder_app/widgets/custom_snackbar.dart';
+import 'package:reminder_app/services/security_service.dart';
 
 class PrivacyScreen extends StatefulWidget {
   const PrivacyScreen({Key? key}) : super(key: key);
@@ -10,8 +11,53 @@ class PrivacyScreen extends StatefulWidget {
 }
 
 class _PrivacyScreenState extends State<PrivacyScreen> {
-  // Simple privacy toggles
-  bool _hideNotificationContent = false;
+  // Privacy toggles
+  bool _appLockEnabled = false;
+  bool _isCheckingBiometrics = true;
+  bool _canUseBiometrics = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final canUse = await SecurityService.isDeviceSupported();
+    setState(() {
+      _appLockEnabled = SecurityService.isAppLockEnabled();
+      _canUseBiometrics = canUse;
+      _isCheckingBiometrics = false;
+    });
+  }
+
+  Future<void> _onAppLockChanged(bool value) async {
+    if (value) {
+      // When enabling, verify user can authenticate first
+      final authenticated = await SecurityService.authenticate(
+        reason: 'Authenticate to enable app lock',
+      );
+      if (!authenticated) {
+        CustomSnackbar.show(
+          title: 'Authentication Failed',
+          message: 'Could not verify your identity',
+          icon: Icons.error_outline,
+        );
+        return;
+      }
+    }
+
+    await SecurityService.setAppLockEnabled(value);
+    setState(() => _appLockEnabled = value);
+
+    CustomSnackbar.show(
+      title: value ? 'App Lock Enabled' : 'App Lock Disabled',
+      message: value
+          ? 'You will need to authenticate to open the app'
+          : 'App lock has been turned off',
+      icon: value ? Icons.lock : Icons.lock_open,
+    );
+  }
 
   void _showDeleteDataDialog() {
     showDialog(
@@ -94,23 +140,32 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Notification Privacy
+              // App Security Section
               const Text(
-                'Notifications',
+                'Security',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               _buildSectionCard(
-                child: _buildToggleItem(
-                  icon: Icons.visibility_off,
-                  iconColor: Colors.grey.shade600,
-                  title: 'Hide Notification Content',
-                  subtitle: 'Hide task details in notifications',
-                  value: _hideNotificationContent,
-                  onChanged: (value) {
-                    setState(() => _hideNotificationContent = value);
-                  },
-                ),
+                child: _isCheckingBiometrics
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    : _buildToggleItem(
+                        icon: Icons.fingerprint,
+                        iconColor: AppColors.primaryColor,
+                        title: 'App Lock',
+                        subtitle: _canUseBiometrics
+                            ? 'Require fingerprint, face, or PIN to open'
+                            : 'Device does not support biometrics',
+                        value: _appLockEnabled,
+                        onChanged: _canUseBiometrics
+                            ? (value) => _onAppLockChanged(value)
+                            : null,
+                      ),
               ),
               const SizedBox(height: 24),
 
@@ -180,46 +235,50 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
     required String title,
     required String subtitle,
     required bool value,
-    required ValueChanged<bool> onChanged,
+    ValueChanged<bool>? onChanged,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
+    final bool isEnabled = onChanged != null;
+    return Opacity(
+      opacity: isEnabled ? 1.0 : 0.5,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: iconColor, size: 22),
             ),
-            child: Icon(icon, color: iconColor, size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                ),
-              ],
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Switch(
-            value: value,
-            activeColor: AppColors.primaryColor,
-            onChanged: onChanged,
-          ),
-        ],
+            Switch(
+              value: value,
+              activeColor: AppColors.primaryColor,
+              onChanged: isEnabled ? onChanged : null,
+            ),
+          ],
+        ),
       ),
     );
   }

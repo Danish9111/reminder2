@@ -1,6 +1,6 @@
 package com.example.reminder_app;
 
-import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.android.FlutterFragmentActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodChannel;
 import android.app.AlarmManager;
@@ -8,7 +8,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Build;
 
-public class MainActivity extends FlutterActivity {
+public class MainActivity extends FlutterFragmentActivity {
     private static final String CHANNEL = "com.example.reminder_app/alarm";
 
     @Override

@@ -8,7 +8,9 @@ import 'package:reminder_app/providers/task_provider.dart';
 import 'package:reminder_app/providers/auth_provider.dart';
 import 'package:reminder_app/providers/user_provider.dart';
 import 'package:reminder_app/services/push_notification_service.dart';
+import 'package:reminder_app/services/security_service.dart';
 import 'package:reminder_app/widgets/custom_snackbar.dart';
+import 'package:reminder_app/widgets/lock_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -18,6 +20,9 @@ void main() async {
 
   // Register background message handler
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+  // Initialize security service (for app lock)
+  await SecurityService.init();
 
   // Initialize push notifications
   await PushNotificationService.init();
@@ -46,8 +51,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF9B59B6)),
           useMaterial3: true,
         ),
-        // home: const BottomNavigationScreen(),
-        home: const AuthWrapper(),
+        home: const LockScreen(child: AuthWrapper()),
       ),
     );
   }

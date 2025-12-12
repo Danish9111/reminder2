@@ -1,81 +1,52 @@
 import 'package:flutter/material.dart';
-import 'package:reminder_app/widgets/custom_snackbar.dart';
-
-import '../AppColors/AppColors.dart';
+import 'package:reminder_app/AppColors/AppColors.dart';
 
 class HelpAndSupportScreen extends StatelessWidget {
-  const HelpAndSupportScreen({Key? key}) : super(key: key);
+  const HelpAndSupportScreen({super.key});
 
-  Widget _buildSectionHeader(String title, double screenWidth) {
-    return Padding(
-      padding: EdgeInsets.only(
-        top: 0.03 * screenWidth,
-        bottom: 0.015 * screenWidth,
-        left: 0.04 * screenWidth,
-        right: 0.04 * screenWidth,
-      ),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 0.045 * screenWidth,
-          fontWeight: FontWeight.bold,
-          color: AppColors.primaryColor,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildListTile({
-    required String title,
-    required IconData icon,
-    String? subtitle,
-    required VoidCallback onTap,
-    Widget? trailing,
-    double? screenWidth,
-  }) {
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: AppColors.primaryColor,
-        size: screenWidth != null ? 0.07 * screenWidth : 24,
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontSize: screenWidth != null ? 0.04 * screenWidth : 16,
-        ),
-      ),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: screenWidth != null ? 0.035 * screenWidth : 14,
-              ),
-            )
-          : null,
-      trailing:
-          trailing ??
-          Icon(
-            Icons.chevron_right,
-            color: Colors.grey,
-            size: screenWidth != null ? 0.06 * screenWidth : 24,
-          ),
-      onTap: onTap,
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: 0.04 * screenWidth!,
-        vertical: 4,
-      ),
-    );
-  }
+  // FAQ data based on actual app features
+  static const List<Map<String, String>> _faqs = [
+    {
+      'question': 'How do I create a new task?',
+      'answer':
+          'Go to the Add Task screen from the home page. You can add tasks manually by filling in the details, or use AI to quickly create tasks with voice or text input.',
+    },
+    {
+      'question': 'How do I add family members?',
+      'answer':
+          'Go to your Profile screen where you\'ll find your unique Family Code. Share this code with the person you want to add. They enter this code on their phone during signup to join your family.',
+    },
+    {
+      'question': 'What is Quiet Hours?',
+      'answer':
+          'Quiet Hours lets you set times when alarms won\'t disturb you. Go to Settings > Quiet Hours to set your preferred schedule. Safety-critical tasks can still notify you if enabled.',
+    },
+    {
+      'question': 'How does the Family Chat work?',
+      'answer':
+          'The Family Chat allows all connected family members to communicate in real-time. Access it from the bottom navigation bar to send messages to your family group.',
+    },
+    {
+      'question': 'How do I enable App Lock?',
+      'answer':
+          'Go to Privacy settings from the drawer and toggle on "App Lock". This requires fingerprint, face, or PIN authentication to open the app.',
+    },
+    {
+      'question': 'How do I manage notifications?',
+      'answer':
+          'Go to Settings and adjust notification preferences. You can set Quiet Hours to limit notifications during specific times.',
+    },
+    {
+      'question': 'What subscription plans are available?',
+      'answer':
+          'We offer Free, Premium, and Family plans. Visit the Subscription screen from the drawer to view features and pricing for each plan.',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final screenWidth = mediaQuery.size.width;
-    final screenHeight = mediaQuery.size.height;
-
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -97,137 +68,101 @@ class HelpAndSupportScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.only(bottom: screenHeight * 0.05),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              // --- FAQs ---
-              _buildSectionHeader('Frequently Asked Questions', screenWidth),
-              _buildListTile(
-                title: 'General App Questions',
-                icon: Icons.question_answer_outlined,
-                screenWidth: screenWidth,
-                onTap: () {
-                  CustomSnackbar.show(
-                    title: 'FAQs',
-                    message: 'Loading General FAQs...',
-                    icon: Icons.question_answer_outlined,
-                  );
-                },
-              ),
-              _buildListTile(
-                title: 'Safety & Emergency Protocols',
-                icon: Icons.security,
-                screenWidth: screenWidth,
-                onTap: () {
-                  CustomSnackbar.show(
-                    title: 'Safety FAQs',
-                    message: 'Loading Safety FAQs...',
-                    icon: Icons.security,
-                  );
-                },
-              ),
-              _buildListTile(
-                title: 'Billing & Subscription',
-                icon: Icons.monetization_on_outlined,
-                screenWidth: screenWidth,
-                onTap: () {
-                  CustomSnackbar.show(
-                    title: 'Billing FAQs',
-                    message: 'Loading Billing FAQs...',
-                    icon: Icons.monetization_on_outlined,
-                  );
-                },
-              ),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: _faqs.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          return _FAQTile(
+            question: _faqs[index]['question']!,
+            answer: _faqs[index]['answer']!,
+          );
+        },
+      ),
+    );
+  }
+}
 
-              // --- Contact ---
-              _buildSectionHeader('Contact Us', screenWidth),
-              _buildListTile(
-                title: 'Report a Bug / Technical Issue',
-                icon: Icons.bug_report_outlined,
-                screenWidth: screenWidth,
-                onTap: () {
-                  CustomSnackbar.show(
-                    title: 'Bug Report',
-                    message: 'Opening Bug Report form...',
-                    icon: Icons.bug_report_outlined,
-                  );
-                },
-              ),
-              _buildListTile(
-                title: 'General Inquiry / Feedback',
-                icon: Icons.email_outlined,
-                screenWidth: screenWidth,
-                onTap: () {
-                  CustomSnackbar.show(
-                    title: 'Feedback',
-                    message: 'Composing new email...',
-                    icon: Icons.email_outlined,
-                  );
-                },
-              ),
-              _buildListTile(
-                title: 'Emergency Support Hotline',
-                icon: Icons.phone_forwarded,
-                subtitle: 'Available 24/7 for critical issues.',
-                trailing: Icon(
-                  Icons.call,
-                  color: Colors.red,
-                  size: 0.06 * screenWidth,
-                ),
-                screenWidth: screenWidth,
-                onTap: () {
-                  CustomSnackbar.show(
-                    title: 'Emergency',
-                    message: 'Calling Emergency Hotline... (Mock)',
-                    icon: Icons.phone_forwarded,
-                  );
-                },
-              ),
+class _FAQTile extends StatefulWidget {
+  final String question;
+  final String answer;
 
-              // --- Tutorial Tips ---
-              _buildSectionHeader('Tutorials & Guides', screenWidth),
-              _buildListTile(
-                title: 'How to create a Safety-Critical Task',
-                icon: Icons.playlist_play,
-                screenWidth: screenWidth,
-                onTap: () {
-                  CustomSnackbar.show(
-                    title: 'Tutorial',
-                    message: 'Starting task creation tutorial...',
-                    icon: Icons.playlist_play,
-                  );
-                },
-              ),
-              _buildListTile(
-                title: 'Understanding Escalation Intervals',
-                icon: Icons.trending_up,
-                screenWidth: screenWidth,
-                onTap: () {
-                  CustomSnackbar.show(
-                    title: 'Guide',
-                    message: 'Showing Escalation Guide...',
-                    icon: Icons.trending_up,
-                  );
-                },
-              ),
-              _buildListTile(
-                title: 'Linking a Family Member Profile',
-                icon: Icons.people_alt_outlined,
-                screenWidth: screenWidth,
-                onTap: () {
-                  CustomSnackbar.show(
-                    title: 'Guide',
-                    message: 'Showing Profile Linking Guide...',
-                    icon: Icons.people_alt_outlined,
-                  );
-                },
-              ),
-              SizedBox(height: screenHeight * 0.05), // bottom spacing
-            ],
+  const _FAQTile({required this.question, required this.answer});
+
+  @override
+  State<_FAQTile> createState() => _FAQTileState();
+}
+
+class _FAQTileState extends State<_FAQTile> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => setState(() => _isExpanded = !_isExpanded),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _isExpanded
+                ? AppColors.primaryColor.withOpacity(0.3)
+                : Colors.transparent,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    widget.question,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                ),
+                AnimatedRotation(
+                  turns: _isExpanded ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    Icons.keyboard_arrow_down,
+                    color: AppColors.primaryColor,
+                  ),
+                ),
+              ],
+            ),
+            AnimatedCrossFade(
+              firstChild: const SizedBox.shrink(),
+              secondChild: Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(
+                  widget.answer,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+              crossFadeState: _isExpanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              duration: const Duration(milliseconds: 200),
+            ),
+          ],
         ),
       ),
     );
