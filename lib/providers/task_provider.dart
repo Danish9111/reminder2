@@ -39,15 +39,18 @@ class TaskProvider extends ChangeNotifier {
   /// Load tasks for a specific family
   Future<void> loadTasksByFamily(String familyId) async {
     try {
+      debugPrint('🟢 [TaskProvider] Loading tasks for familyId: "$familyId"');
       _isLoading = true;
       _error = null;
       notifyListeners();
 
       _tasks = await _taskService.fetchTasksByFamily(familyId);
+      debugPrint('🟢 [TaskProvider] Loaded ${_tasks.length} tasks');
 
       _isLoading = false;
       notifyListeners();
     } catch (e) {
+      debugPrint('🔴 [TaskProvider] Error loading tasks: $e');
       _error = e.toString();
       _isLoading = false;
       notifyListeners();

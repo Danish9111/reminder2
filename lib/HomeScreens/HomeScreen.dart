@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:reminder_app/DrawerScreens/SubscriptionConfirm.dart'
+    as AppColors;
 import 'package:reminder_app/models/task_model.dart';
 import 'package:reminder_app/providers/task_provider.dart';
 import 'package:reminder_app/widgets/custom_snackbar.dart';
@@ -14,8 +16,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final Color primaryColor = const Color(0xFF9B59B6);
-
   void _handleTaskCompleted(TaskModel task) {
     context.read<TaskProvider>().toggleTaskDone(task);
     CustomSnackbar.show(
@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final tasks = context.watch<TaskProvider>().tasks;
 
     return MainHomeContent(
-      primaryColor: primaryColor,
+      primaryColor: AppColors.primaryColor,
       tasks: tasks,
       onTaskRemoved: _handleTaskCompleted,
     );
@@ -246,6 +246,7 @@ class MiniCalendar extends StatelessWidget {
   final Function(DateTime) onDaySelected;
   final VoidCallback onPreviousWeek;
   final VoidCallback onNextWeek;
+  final Set<DateTime> taskDates;
 
   const MiniCalendar({
     super.key,
@@ -255,7 +256,15 @@ class MiniCalendar extends StatelessWidget {
     required this.onDaySelected,
     required this.onPreviousWeek,
     required this.onNextWeek,
+    required this.taskDates,
   });
+
+  bool _hasTaskOnDate(DateTime date) {
+    final normalized = DateUtils.normalize(date);
+    return taskDates.any(
+      (taskDate) => DateUtils.isSameDay(taskDate, normalized),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -305,25 +314,40 @@ class MiniCalendar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: days.map((d) {
             final isSelected = DateUtils.isSameDay(selectedDay, d);
+            final hasTask = _hasTaskOnDate(d);
             return GestureDetector(
               onTap: () => onDaySelected(d),
-              child: Container(
-                width: 36,
-                height: 36,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: isSelected ? primaryColor : Colors.transparent,
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  "${d.day}",
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black,
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isSelected ? primaryColor : Colors.transparent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      "${d.day}",
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : Colors.black,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 2),
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: hasTask ? primaryColor : Colors.transparent,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ],
               ),
             );
           }).toList(),
@@ -496,6 +520,7 @@ class CalendarCard extends StatelessWidget {
   final VoidCallback onToggleExpanded;
   final VoidCallback onPreviousWeek;
   final VoidCallback onNextWeek;
+  final Set<DateTime> taskDates;
 
   const CalendarCard({
     super.key,
@@ -507,7 +532,15 @@ class CalendarCard extends StatelessWidget {
     required this.onToggleExpanded,
     required this.onPreviousWeek,
     required this.onNextWeek,
+    required this.taskDates,
   });
+
+  bool _hasTaskOnDate(DateTime date) {
+    final normalized = DateUtils.normalize(date);
+    return taskDates.any(
+      (taskDate) => DateUtils.isSameDay(taskDate, normalized),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -571,6 +604,24 @@ class CalendarCard extends StatelessWidget {
                   todayTextStyle: const TextStyle(color: Colors.white),
                   defaultTextStyle: const TextStyle(color: Colors.black),
                 ),
+                calendarBuilders: CalendarBuilders(
+                  markerBuilder: (context, date, events) {
+                    if (_hasTaskOnDate(date)) {
+                      return Positioned(
+                        bottom: 1,
+                        child: Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: primaryColor,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      );
+                    }
+                    return null;
+                  },
+                ),
               )
             else
               MiniCalendar(
@@ -580,6 +631,7 @@ class CalendarCard extends StatelessWidget {
                 onDaySelected: (day) => onDaySelected(day, day),
                 onPreviousWeek: onPreviousWeek,
                 onNextWeek: onNextWeek,
+                taskDates: taskDates,
               ),
             GestureDetector(
               onTap: onToggleExpanded,
@@ -684,6 +736,9 @@ class MainHomeContentState extends State<MainHomeContent> {
             onToggleExpanded: _toggleCalendarExpanded,
             onPreviousWeek: _goToPreviousWeek,
             onNextWeek: _goToNextWeek,
+            taskDates: _tasks
+                .map((t) => DateUtils.normalize(t.dueDate))
+                .toSet(),
           ),
           const SizedBox(height: 10),
           Expanded(

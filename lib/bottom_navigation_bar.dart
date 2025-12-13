@@ -9,6 +9,7 @@ import 'package:reminder_app/chatscreen/FamilyChatScreen.dart';
 import 'package:reminder_app/profilescreen/ProfileScreen.dart';
 import 'package:reminder_app/DrawerScreens/notification.dart';
 import 'package:reminder_app/providers/family_provider.dart';
+import 'package:reminder_app/providers/task_provider.dart';
 import 'package:reminder_app/widgets/app_drawer.dart';
 import 'package:reminder_app/Authentication_Onboarding/Login+Otp/FamilySetupScreen.dart';
 
@@ -56,8 +57,15 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<FamilyProvider>().loadFamily();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Load family first
+      await context.read<FamilyProvider>().loadFamily();
+
+      // Then load tasks for this family
+      final familyId = context.read<FamilyProvider>().family?.id;
+      if (familyId != null) {
+        context.read<TaskProvider>().loadTasksByFamily(familyId);
+      }
     });
   }
 

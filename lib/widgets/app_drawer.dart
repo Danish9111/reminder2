@@ -71,7 +71,7 @@ class _AppDrawerState extends State<AppDrawer> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  "${capitalize(familyName!)}'s Family",
+                  "${capitalize(familyName ?? '')}'s Family",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 24,
@@ -80,7 +80,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  userName!,
+                  userName ?? '',
                   style: TextStyle(color: Colors.white70, fontSize: 14),
                 ),
               ],

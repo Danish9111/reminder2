@@ -362,6 +362,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     final familyId = familyProvider.family?.id ?? '';
     final uid = currentUid ?? '';
 
+    debugPrint('🔵 [AddTask] familyId: "$familyId"');
+    debugPrint('🔵 [AddTask] family loaded: ${familyProvider.family != null}');
+
     // Create TaskModel
     final newTask = TaskModel(
       title: _taskController.text.trim(),
@@ -374,6 +377,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       createdBy: uid,
       familyId: familyId,
     );
+
+    debugPrint('🔵 [AddTask] Creating task with familyId: ${newTask.familyId}');
 
     // Save to Firebase via provider
     final success = await context.read<TaskProvider>().addTask(newTask);

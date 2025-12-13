@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:reminder_app/AppColors/AppColors.dart';
 import 'package:reminder_app/models/family_member.dart';
@@ -374,7 +376,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
 
   Widget _buildActivityList() {
     // Build activities from recent tasks
-    final recentTasks = _tasks.take(5).toList();
+    final recentTasks = _tasks.toList();
 
     if (recentTasks.isEmpty) {
       return Container(
