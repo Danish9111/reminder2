@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:reminder_app/auth_wrapper.dart';
@@ -46,8 +47,9 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         navigatorKey: navigatorKey, // Required for Snackbar
         debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
+        title: 'Reminder',
         theme: ThemeData(
+          textTheme: GoogleFonts.plusJakartaSansTextTheme(),
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF9B59B6)),
           useMaterial3: true,
         ),

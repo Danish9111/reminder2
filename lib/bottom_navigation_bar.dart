@@ -117,11 +117,13 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
         // onLogout: _handleLogout,
       ),
       appBar: AppBar(
+        toolbarHeight: 40,
         title: Text(
           getTitle(_selectedIndex, familyName: familyName),
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
+            fontSize: 20,
           ),
         ),
         backgroundColor: AppColors.primaryColor,
@@ -132,7 +134,7 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
             icon: const Icon(
               Icons.notifications_none,
               color: Colors.white,
-              size: 30,
+              size: 25,
             ),
             onPressed: () {
               Navigator.push(

@@ -29,15 +29,27 @@ dependencies:
   firebase_messaging: ^16.0.4
   local_auth: ^2.2.0
   shared_preferences: ^2.2.2
+  google_fonts: ^6.3.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.3
 
 
 flutter:
 
   
   uses-material-design: true
+
+  assets:
+    - assets/icons/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/transparent-logo.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icons/transparent-logo.png"
