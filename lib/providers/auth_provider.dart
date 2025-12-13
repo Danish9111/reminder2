@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:reminder_app/services/auth_service.dart';
@@ -8,14 +7,12 @@ class AuthProvider extends ChangeNotifier {
 
   User? _user;
   bool _isLoading = false;
-  String? _verificationId;
   String? _error;
 
   User? get user => _user;
   bool get isLoading => _isLoading;
   bool get isLoggedIn => _user != null;
   String? get error => _error;
-  String? get verificationId => _verificationId;
 
   AuthProvider() {
     _user = _authService.currentUser;
@@ -25,70 +22,27 @@ class AuthProvider extends ChangeNotifier {
     });
   }
 
-  // Step 1: Send OTP to phone number
-  Future<bool> sendOTP(String phoneNumber) async {
+  // Sign up with email and password
+  Future<bool> signUp(String email, String password) async {
     _isLoading = true;
     _error = null;
-    _verificationId = null;
     notifyListeners();
 
-    // Use Completer to wait for the callback
-    final completer = Completer<bool>();
-
     try {
-      await _authService.verifyPhoneNumber(
-        phoneNumber: phoneNumber,
-        onCodeSent: (verificationId, resendToken) {
-          debugPrint("Code sent! verificationId: $verificationId");
-          _verificationId = verificationId;
-          _isLoading = false;
-          notifyListeners();
-          if (!completer.isCompleted) {
-            completer.complete(true);
-          }
-        },
-        onVerificationFailed: (e) {
-          debugPrint("Verification failed: ${e.message}");
-          _error = e.message ?? "Verification failed";
-          _isLoading = false;
-          notifyListeners();
-          if (!completer.isCompleted) {
-            completer.complete(false);
-          }
-        },
-        onCodeAutoRetrievalTimeout: (id) {
-          debugPrint("Auto retrieval timeout, id: $id");
-          _verificationId = id;
-        },
-        onVerificationCompleted: (credential) async {
-          debugPrint("Auto-verification completed!");
-          // Auto-verification on Android (optional handling)
-          try {
-            final result = await _authService.signInWithCredential(credential);
-            _user = result;
-            _isLoading = false;
-            notifyListeners();
-            if (!completer.isCompleted) {
-              completer.complete(true);
-            }
-          } catch (e) {
-            debugPrint("Auto-verification sign-in failed: $e");
-          }
-        },
+      final user = await _authService.signUpWithEmail(
+        email: email,
+        password: password,
       );
-
-      // Wait for one of the callbacks to complete (with timeout)
-      return await completer.future.timeout(
-        const Duration(seconds: 60),
-        onTimeout: () {
-          _error = "Request timed out";
-          _isLoading = false;
-          notifyListeners();
-          return false;
-        },
-      );
+      _user = user;
+      _isLoading = false;
+      notifyListeners();
+      return user != null;
+    } on FirebaseAuthException catch (e) {
+      _error = _getReadableError(e.code);
+      _isLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
-      debugPrint("sendOTP exception: $e");
       _error = e.toString();
       _isLoading = false;
       notifyListeners();
@@ -96,27 +50,50 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Step 2: Verify OTP code
-  Future<bool> verifyOTP(String otp) async {
-    if (_verificationId == null) {
-      _error = "No verification in progress";
-      notifyListeners();
-      return false;
-    }
-
+  // Sign in with email and password
+  Future<bool> signIn(String email, String password) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final user = await _authService.signInWithOTP(
-        verificationId: _verificationId!,
-        smsCode: otp,
+      final user = await _authService.signInWithEmail(
+        email: email,
+        password: password,
       );
       _user = user;
       _isLoading = false;
       notifyListeners();
       return user != null;
+    } on FirebaseAuthException catch (e) {
+      _error = _getReadableError(e.code);
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Send password reset email
+  Future<bool> resetPassword(String email) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _authService.sendPasswordResetEmail(email: email);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } on FirebaseAuthException catch (e) {
+      _error = _getReadableError(e.code);
+      _isLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       _error = e.toString();
       _isLoading = false;
@@ -134,7 +111,6 @@ class AuthProvider extends ChangeNotifier {
 
       await _authService.signOut();
       _user = null;
-      _verificationId = null;
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -148,5 +124,29 @@ class AuthProvider extends ChangeNotifier {
   void clearError() {
     _error = null;
     notifyListeners();
+  }
+
+  // Convert Firebase error codes to user-friendly messages
+  String _getReadableError(String code) {
+    switch (code) {
+      case 'email-already-in-use':
+        return 'This email is already registered. Please sign in.';
+      case 'invalid-email':
+        return 'Please enter a valid email address.';
+      case 'weak-password':
+        return 'Password is too weak. Use at least 6 characters.';
+      case 'user-not-found':
+        return 'No account found with this email.';
+      case 'wrong-password':
+        return 'Incorrect password. Please try again.';
+      case 'invalid-credential':
+        return 'Invalid email or password.';
+      case 'user-disabled':
+        return 'This account has been disabled.';
+      case 'too-many-requests':
+        return 'Too many attempts. Please try again later.';
+      default:
+        return 'An error occurred. Please try again.';
+    }
   }
 }

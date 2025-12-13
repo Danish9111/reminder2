@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:reminder_app/AppColors/AppColors.dart';
-import 'package:reminder_app/Authentication_Onboarding/Login+Otp/login.dart';
+import 'package:reminder_app/Authentication_Onboarding/Login+Otp/login_screen.dart';
 import 'package:reminder_app/DrawerScreens/Subscriptions_&_checkout.dart';
 import 'package:reminder_app/DrawerScreens/notification.dart';
 import 'package:reminder_app/DrawerScreens/quiet_hours.dart';
@@ -578,7 +578,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     );
                   } else {
                     if (mounted) {
-                      context.replaceAllWith(const PhoneLoginScreen());
+                      context.replaceAllWith(const EmailLoginScreen());
                     }
                   }
                 },

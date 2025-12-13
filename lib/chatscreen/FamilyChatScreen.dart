@@ -129,9 +129,10 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
                 }
 
                 // Messages are in descending order, reverse for display
-                final messages = chatProvider.messages.reversed.toList();
+                final messages = chatProvider.messages;
 
                 return ListView.builder(
+                  reverse: true,
                   controller: _scrollController,
                   padding: EdgeInsets.symmetric(
                     horizontal: screenWidth * 0.04,
@@ -142,10 +143,11 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
                     final msg = messages[index];
 
                     // Determine position in consecutive sequence from same sender
-                    final prevMsg = index > 0 ? messages[index - 1] : null;
-                    final nextMsg = index < messages.length - 1
+                    // With reverse:true, index 0 is newest (at bottom), so prev/next are swapped
+                    final prevMsg = index < messages.length - 1
                         ? messages[index + 1]
                         : null;
+                    final nextMsg = index > 0 ? messages[index - 1] : null;
 
                     final isFirstInSequence =
                         prevMsg == null || prevMsg.senderId != msg.senderId;
@@ -273,11 +275,8 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
 
     if (isMe) {
       // My messages - small corners on the right side create chain effect
-      if (isFirstInSequence && isLastInSequence) {
+      if (isFirstInSequence) {
         // Single message - small corner at bottom right only
-        bottomRightRadius = smallRadius;
-      } else if (isFirstInSequence) {
-        // First in sequence - small corner at bottom right (connects to next)
         bottomRightRadius = smallRadius;
       } else if (isLastInSequence) {
         // Last in sequence - small corner at top right (connects to previous)
@@ -289,15 +288,13 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
       }
     } else {
       // Other's messages - small corners on the left side create chain effect
-      if (isFirstInSequence && isLastInSequence) {
-        // Single message - small corner at bottom left only
-        bottomLeftRadius = smallRadius;
-      } else if (isFirstInSequence) {
-        // First in sequence - small corner at bottom left (connects to next)
-        bottomLeftRadius = smallRadius;
-      } else if (isLastInSequence) {
-        // Last in sequence - small corner at top left (connects to previous)
+      if (isLastInSequence) {
         topLeftRadius = smallRadius;
+
+        // Single message - small corner at bottom left only
+      } else if (isFirstInSequence) {
+        // Last in sequence - small corner at top left (connects to previous)
+        bottomLeftRadius = smallRadius;
       } else {
         // Middle messages - small corners at both top and bottom left (connects both ways)
         topLeftRadius = smallRadius;
@@ -352,11 +349,11 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
             ),
             child: msg.type == 'image' && msg.mediaUrl != null
                 ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: .min,
+                    crossAxisAlignment: .end,
                     children: [
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: .circular(12),
                         child: Image.network(
                           msg.mediaUrl!,
                           height: screenWidth * 0.4,
@@ -368,7 +365,7 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
                                 width: screenWidth * 0.55,
                                 decoration: BoxDecoration(
                                   color: Colors.grey[300],
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: .circular(12),
                                 ),
                                 child: const Center(
                                   child: Icon(
@@ -528,11 +525,11 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
 
     _messageController.clear();
 
-    // Scroll to bottom after sending
+    // Scroll to bottom after sending (with reverse:true, position 0 is the bottom)
     Future.delayed(const Duration(milliseconds: 300), () {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
+          0, // With reverse:true, 0 is the bottom
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );

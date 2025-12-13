@@ -19,62 +19,49 @@ class AuthService {
     }
   }
 
-  // Phone Auth: 1. Verify Phone Number (Sends SMS)
-  Future<void> verifyPhoneNumber({
-    required String phoneNumber,
-    required Function(String, int?) onCodeSent,
-    required Function(FirebaseAuthException) onVerificationFailed,
-    required Function(String) onCodeAutoRetrievalTimeout,
-    required Function(PhoneAuthCredential)
-    onVerificationCompleted, // For auto-verification (Android)
+  // Email Auth: Sign up with email and password
+  Future<User?> signUpWithEmail({
+    required String email,
+    required String password,
   }) async {
     try {
-      debugPrint("Error initiating phone auth: ");
-
-      await _auth.verifyPhoneNumber(
-        phoneNumber: phoneNumber,
-        verificationCompleted: onVerificationCompleted,
-        verificationFailed: onVerificationFailed,
-        codeSent: onCodeSent,
-        codeAutoRetrievalTimeout: onCodeAutoRetrievalTimeout,
+      final UserCredential result = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
       );
+      debugPrint("Signed up with email: ${result.user?.uid}");
+      return result.user;
     } catch (e) {
-      debugPrint("Error initiating phone auth: $e");
+      debugPrint("Error signing up with email: $e");
       rethrow;
     }
   }
 
-  // Phone Auth: 2. Sign in with OTP (Verifies Code)
-  Future<User?> signInWithOTP({
-    required String verificationId,
-    required String smsCode,
+  // Email Auth: Sign in with email and password
+  Future<User?> signInWithEmail({
+    required String email,
+    required String password,
   }) async {
     try {
-      final credential = PhoneAuthProvider.credential(
-        verificationId: verificationId,
-        smsCode: smsCode,
+      final UserCredential result = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
-      final UserCredential result = await _auth.signInWithCredential(
-        credential,
-      );
-      debugPrint("Signed in with phone: ${result.user?.uid}");
+      debugPrint("Signed in with email: ${result.user?.uid}");
       return result.user;
     } catch (e) {
-      debugPrint("Error signing in with OTP: $e");
+      debugPrint("Error signing in with email: $e");
       rethrow;
     }
   }
 
-  // Phone Auth: 3. Sign in with credential (for auto-verification)
-  Future<User?> signInWithCredential(PhoneAuthCredential credential) async {
+  // Email Auth: Send password reset email
+  Future<void> sendPasswordResetEmail({required String email}) async {
     try {
-      final UserCredential result = await _auth.signInWithCredential(
-        credential,
-      );
-      debugPrint("Signed in with credential: ${result.user?.uid}");
-      return result.user;
+      await _auth.sendPasswordResetEmail(email: email);
+      debugPrint("Password reset email sent to: $email");
     } catch (e) {
-      debugPrint("Error signing in with credential: $e");
+      debugPrint("Error sending password reset email: $e");
       rethrow;
     }
   }

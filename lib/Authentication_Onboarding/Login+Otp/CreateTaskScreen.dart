@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
 class CreateTaskScreen extends StatefulWidget {
-  const CreateTaskScreen({Key? key}) : super(key: key);
+  const CreateTaskScreen({super.key});
 
   @override
   State<CreateTaskScreen> createState() => _CreateTaskScreenState();
 }
 
 class _CreateTaskScreenState extends State<CreateTaskScreen> {
-  final TextEditingController _taskNameController =
-  TextEditingController(text: 'School Drop-off');
+  final TextEditingController _taskNameController = TextEditingController(
+    text: 'School Drop-off',
+  );
   final TextEditingController _notesController = TextEditingController();
 
   TimeOfDay _selectedTime = TimeOfDay(hour: 8, minute: 0);
@@ -53,7 +54,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
           // Expanded Scrollable Area
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.06, vertical: screenHeight * 0.02),
+              padding: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.06,
+                vertical: screenHeight * 0.02,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -76,11 +80,17 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Color(0xFFECF0F1), width: 2),
+                        borderSide: BorderSide(
+                          color: Color(0xFFECF0F1),
+                          width: 2,
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Color(0xFF9B59B6), width: 2),
+                        borderSide: BorderSide(
+                          color: Color(0xFF9B59B6),
+                          width: 2,
+                        ),
                       ),
                     ),
                   ),
@@ -96,12 +106,19 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           child: Container(
                             padding: EdgeInsets.all(screenHeight * 0.02),
                             decoration: BoxDecoration(
-                              border: Border.all(color: Color(0xFFECF0F1), width: 2),
+                              border: Border.all(
+                                color: Color(0xFFECF0F1),
+                                width: 2,
+                              ),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.calendar_today, color: Color(0xFF9B59B6), size: screenHeight * 0.025),
+                                Icon(
+                                  Icons.calendar_today,
+                                  color: Color(0xFF9B59B6),
+                                  size: screenHeight * 0.025,
+                                ),
                                 SizedBox(width: screenWidth * 0.03),
                                 Text(
                                   '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
@@ -123,12 +140,19 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           child: Container(
                             padding: EdgeInsets.all(screenHeight * 0.02),
                             decoration: BoxDecoration(
-                              border: Border.all(color: Color(0xFFECF0F1), width: 2),
+                              border: Border.all(
+                                color: Color(0xFFECF0F1),
+                                width: 2,
+                              ),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.access_time, color: Color(0xFF9B59B6), size: screenHeight * 0.025),
+                                Icon(
+                                  Icons.access_time,
+                                  color: Color(0xFF9B59B6),
+                                  size: screenHeight * 0.025,
+                                ),
                                 SizedBox(width: screenWidth * 0.03),
                                 Text(
                                   _selectedTime.format(context),
@@ -163,7 +187,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     spacing: screenWidth * 0.03,
                     runSpacing: screenHeight * 0.015,
                     children: _familyMembers.map((member) {
-                      final isSelected = _selectedMembers.contains(member['name']);
+                      final isSelected = _selectedMembers.contains(
+                        member['name'],
+                      );
                       return GestureDetector(
                         onTap: () {
                           setState(() {
@@ -175,10 +201,20 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           });
                         },
                         child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: screenHeight * 0.015),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.04,
+                            vertical: screenHeight * 0.015,
+                          ),
                           decoration: BoxDecoration(
-                            color: isSelected ? member['color'].withOpacity(0.1) : Color(0xFFECF0F1).withOpacity(0.5),
-                            border: Border.all(color: isSelected ? member['color'] : Colors.transparent, width: 2),
+                            color: isSelected
+                                ? member['color'].withOpacity(0.1)
+                                : Color(0xFFECF0F1).withOpacity(0.5),
+                            border: Border.all(
+                              color: isSelected
+                                  ? member['color']
+                                  : Colors.transparent,
+                              width: 2,
+                            ),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
@@ -207,8 +243,12 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               ),
                               if (isSelected) ...[
                                 SizedBox(width: screenWidth * 0.01),
-                                Icon(Icons.check_circle, size: screenHeight * 0.02, color: member['color']),
-                              ]
+                                Icon(
+                                  Icons.check_circle,
+                                  size: screenHeight * 0.02,
+                                  color: member['color'],
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -228,7 +268,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     ),
                     decoration: InputDecoration(
                       labelText: 'Notes (Optional)',
-                      labelStyle: TextStyle(color: Color(0xFF34495E).withOpacity(0.6)),
+                      labelStyle: TextStyle(
+                        color: Color(0xFF34495E).withOpacity(0.6),
+                      ),
                       hintText: 'Add any important details...',
                       alignLabelWithHint: true,
                       border: OutlineInputBorder(
@@ -236,11 +278,17 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Color(0xFFECF0F1), width: 2),
+                        borderSide: BorderSide(
+                          color: Color(0xFFECF0F1),
+                          width: 2,
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Color(0xFF9B59B6), width: 2),
+                        borderSide: BorderSide(
+                          color: Color(0xFF9B59B6),
+                          width: 2,
+                        ),
                       ),
                     ),
                   ),
@@ -256,7 +304,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.notifications_active, color: Color(0xFF9B59B6)),
+                        Icon(
+                          Icons.notifications_active,
+                          color: Color(0xFF9B59B6),
+                        ),
                         SizedBox(width: screenWidth * 0.03),
                         Expanded(
                           child: Column(
@@ -324,20 +375,20 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
               ),
               child: _isLoading
                   ? SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
                   : Text(
-                'Create Task',
-                style: TextStyle(
-                  fontSize: screenHeight * 0.022,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+                      'Create Task',
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.022,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
             ),
           ),
         ],
@@ -352,9 +403,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(Duration(days: 365)),
       builder: (context, child) => Theme(
-        data: Theme.of(context).copyWith(
-          colorScheme: ColorScheme.light(primary: Color(0xFF9B59B6)),
-        ),
+        data: Theme.of(
+          context,
+        ).copyWith(colorScheme: ColorScheme.light(primary: Color(0xFF9B59B6))),
         child: child!,
       ),
     );
@@ -366,9 +417,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       context: context,
       initialTime: _selectedTime,
       builder: (context, child) => Theme(
-        data: Theme.of(context).copyWith(
-          colorScheme: ColorScheme.light(primary: Color(0xFF9B59B6)),
-        ),
+        data: Theme.of(
+          context,
+        ).copyWith(colorScheme: ColorScheme.light(primary: Color(0xFF9B59B6))),
         child: child!,
       ),
     );
@@ -411,9 +462,7 @@ class MainDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Text('Main Dashboard - Next artifact'),
-      ),
+      body: Center(child: Text('Main Dashboard - Next artifact')),
     );
   }
 }

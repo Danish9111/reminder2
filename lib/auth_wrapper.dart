@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:reminder_app/Authentication_Onboarding/Login+Otp/FamilySetupScreen.dart';
 import 'package:reminder_app/bottom_navigation_bar.dart';
 import 'package:reminder_app/Authentication_Onboarding/Login+Otp/ProfileSetupScreen.dart';
-import 'package:reminder_app/Authentication_Onboarding/Login+Otp/login.dart';
+import 'package:reminder_app/Authentication_Onboarding/Login+Otp/login_screen.dart';
 import 'package:reminder_app/services/auth_service.dart';
 import 'package:reminder_app/services/user_service.dart';
 
@@ -50,7 +50,7 @@ class AuthWrapper extends StatelessWidget {
           );
         }
 
-        return const PhoneLoginScreen();
+        return const EmailLoginScreen();
       },
     );
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:reminder_app/Authentication_Onboarding/Login+Otp/login.dart';
+import 'package:reminder_app/Authentication_Onboarding/Login+Otp/login_screen.dart';
 import 'package:reminder_app/DrawerScreens/FamilyPage.dart';
 import 'package:reminder_app/DrawerScreens/SettingScreen.dart';
 import 'package:reminder_app/DrawerScreens/Subscriptions_&_checkout.dart';
@@ -156,7 +156,7 @@ class _AppDrawerState extends State<AppDrawer> {
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const PhoneLoginScreen(),
+                  builder: (context) => const EmailLoginScreen(),
                 ),
                 (route) => false,
               );
