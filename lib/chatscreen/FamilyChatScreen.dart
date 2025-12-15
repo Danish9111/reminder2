@@ -200,7 +200,9 @@ class _FamilyChatScreenState extends State<FamilyChatScreen> {
         child: InkWell(
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Converting to Task...")),
+              const SnackBar(
+                content: Text("Converting to Task... (Opened Add Task Screen)"),
+              ),
             );
           },
           child: Container(
